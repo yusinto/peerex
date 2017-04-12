@@ -56,7 +56,7 @@ export default class Peerex extends Component {
           style={styles.signUpButtonText}
           styleDisabled={{color: 'red'}}
           onPress={() => this._handlePress()}>
-          Log In
+          Sign Up
         </Button>
       </View>
     );
