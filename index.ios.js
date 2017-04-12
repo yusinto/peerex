@@ -33,13 +33,27 @@ export default class Peerex extends Component {
         <View style={styles.textInputContainer}>
           <TextInput
             style={styles.textInput}
+            secureTextEntry={true}
             placeholder="Password"
             onChangeText={(text) => this.setState({text})}
           />
         </View>
         <Button
-          containerStyle={styles.buttonContainer}
-          style={styles.buttonText}
+          containerStyle={styles.loginButtonContainer}
+          style={styles.loginButtonText}
+          styleDisabled={{color: 'red'}}
+          onPress={() => this._handlePress()}>
+          Log In
+        </Button>
+        <Button style={styles.forgotPassword}>
+          Oh, no! Forgot Password?
+        </Button>
+        <Text style={styles.noAccount}>
+          Don't have a Peerex account?
+        </Text>
+        <Button
+          containerStyle={styles.signUpButtonContainer}
+          style={styles.signUpButtonText}
           styleDisabled={{color: 'red'}}
           onPress={() => this._handlePress()}>
           Log In
@@ -78,7 +92,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
   },
-  buttonContainer: {
+  loginButtonContainer: {
     marginTop: 20,
     height: 40,
     width: '90%',
@@ -86,13 +100,41 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: 'hidden',
   },
-  buttonText: {
+  loginButtonText: {
     fontSize: 14,
     color: '#FFFFFF',
     //fontFamily: Montserrat,
     marginTop: 11,
     textAlign: 'center'
-  }
+  },
+  forgotPassword: {
+    marginTop: 27,
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#383838',
+  },
+  noAccount: {
+    marginTop: 61,
+    fontSize: 12,
+    fontWeight: '300',
+    color: '#383838',
+  },
+  signUpButtonContainer: {
+    marginTop: 15,
+    height: 40,
+    width: '90%',
+    borderRadius: 4,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#383838',
+  },
+  signUpButtonText: {
+    fontSize: 14,
+    color: '#383838',
+    //fontFamily: Montserrat,
+    marginTop: 11,
+    textAlign: 'center'
+  },
 });
 
 AppRegistry.registerComponent('peerex', () => Peerex);
