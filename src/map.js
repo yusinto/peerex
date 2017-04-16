@@ -17,7 +17,7 @@ export default class Map extends Component {
       visible: true,
       //left: null,  // TODO: replace this with hamburger slider menu
       style: {
-        backgroundColor: '#21BE82'
+        backgroundColor: '#21BE82',
       },
       titleStyle: {
         color: '#FFFFFF',
@@ -31,15 +31,27 @@ export default class Map extends Component {
   // TODO: https://gist.github.com/heron2014/e60fa003e9b117ce80d56bb1d5bfe9e0
   render() {
     return (
-      <View style={styles.container}>
+      <View style={styles.root}>
+        <View style={styles.textInputContainer}>
+          <TextInput
+            style={styles.amountRequestedTextInput}
+            placeholder="money"
+            onChangeText={(text) => this.setState({text})}
+          />
+          <TextInput
+            style={styles.locationTextInput}
+            placeholder="location"
+            onChangeText={(text) => this.setState({text})}
+          />
+        </View>
         <MapView
           style={styles.map}
           initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
+              latitude: 37.78825,
+              longitude: -122.4324,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
         />
       </View>
     );
@@ -47,17 +59,37 @@ export default class Map extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#21BE82',
+    width: '100%',
+  },
+  textInputContainer: {
+    width: '88%',
+  },
+  amountRequestedTextInput: {
+    marginTop: 10,
+    height: 42,
+    paddingLeft: 20,
+    paddingRight: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 4,
+  },
+  locationTextInput: {
+    marginTop: 10,
+    height: 42,
+    paddingLeft: 20,
+    paddingRight: 20,
+    backgroundColor: '#00A76D',
+    borderRadius: 4,
   },
   map: {
     position: 'absolute',
-    top: 0,
+    top: 115,
     left: 0,
     right: 0,
     bottom: 0,
-  }
+  },
 });
