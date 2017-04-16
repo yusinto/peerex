@@ -46,6 +46,7 @@ export default class Map extends Component {
         </View>
         <MapView
           style={styles.map}
+          showsUserLocation = {true}
           initialRegion={{
               latitude: 37.78825,
               longitude: -122.4324,
