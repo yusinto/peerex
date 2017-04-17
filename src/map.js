@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import Button from 'react-native-button';
 import MapView from 'react-native-maps'; // GOTCHA: had to install babel-plugin-module-resolver to solve a bug! https://github.com/airbnb/react-native-maps/issues/795
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import SteppedInput from './components/steppedInput';
 
 export default class Map extends Component {
   //http://stackoverflow.com/questions/42261011/react-navigation-switching-background-colors-and-styling-stacknavigator
@@ -32,21 +34,13 @@ export default class Map extends Component {
   render() {
     return (
       <View style={styles.root}>
+        <SteppedInput />
         <View style={styles.textInputContainer}>
-          <TextInput
-            style={styles.amountRequestedTextInput}
-            placeholder="money"
-            onChangeText={(text) => this.setState({text})}
-          />
-          <TextInput
-            style={styles.locationTextInput}
-            placeholder="location"
-            onChangeText={(text) => this.setState({text})}
-          />
+          <TextInput style={styles.locationTextInput} placeholder="location"/>
         </View>
         <MapView
           style={styles.map}
-          showsUserLocation = {true}
+          showsUserLocation={true}
           initialRegion={{
               latitude: 37.78825,
               longitude: -122.4324,
