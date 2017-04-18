@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import Button from 'react-native-button';
 import MapView from 'react-native-maps'; // GOTCHA: had to install babel-plugin-module-resolver to solve a bug! https://github.com/airbnb/react-native-maps/issues/795
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import SteppedInput from './components/steppedInput';
 
 export default class Map extends Component {

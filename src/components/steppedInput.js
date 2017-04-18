@@ -33,7 +33,7 @@ export default class SteppedInput extends Component {
   render() {
     return (
       <View style={styles.root}>
-        <TextInput style={styles.currency} defaultValue="SGD" />
+        <TextInput style={styles.currency} defaultValue="SGD"/>
         <TextInput style={styles.textInput} value={this.state.amount.toString()}/>
         <View style={styles.plusMinusContainer}>
           <TouchableOpacity
@@ -84,15 +84,11 @@ const styles = StyleSheet.create({
   },
   plusMinus: {
     flex: 1,
-    //borderWidth: 1,
-    //borderColor: 'red',
   },
   verticalBar: {
     flex: 1,
     fontSize: 30,
     color: '#D3BCC0',
     textAlign: 'center',
-    //borderWidth: 1,
-    //borderColor: 'blue',
   },
 });

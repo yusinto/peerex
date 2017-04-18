@@ -7,6 +7,8 @@ import {
   TextInput,
 } from 'react-native';
 import Button from 'react-native-button';
+import {LoginButton, AccessToken, LoginManager} from 'react-native-fbsdk';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 
 export default class Login extends Component {
   static navigationOptions = {
@@ -18,14 +20,29 @@ export default class Login extends Component {
 
   constructor(props) {
     super(props);
-    this.onClickLogin = this.onClickLogin.bind(this);
+    this.onClickFBLogin = this.onClickFBLogin.bind(this);
+    this.onClickCreateAccount = this.onClickCreateAccount.bind(this);
   }
 
-  onClickLogin() {
-    // TODO: authentication
+  onClickFBLogin() {
+    LoginManager.logInWithReadPermissions(['email', 'public_profile']).then(
+      result => {
+        if (result.isCancelled) {
+          alert('FB login cancelled');
+        } else {
+          AccessToken.getCurrentAccessToken().then(data => {
+            //alert(`FB login success! ${data.accessToken.toString()}`);
+            this.props.navigation.navigate('Map');
+          });
+        }
+      },
+      error => alert(`FB login error: ${error}`)
+    );
+  }
 
-    // onsuccess of authentication, go to maps
-    this.props.navigation.navigate('Map');
+  onClickCreateAccount() {
+    // TODO: create account
+    alert('TODO: create account');
   }
 
   render() {
@@ -35,40 +52,21 @@ export default class Login extends Component {
         <Text style={styles.welcome}>
           Welcome to Peerex
         </Text>
-        <View style={styles.textInputContainer}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Email"
-            onChangeText={(text) => this.setState({text})}
-          />
-        </View>
-        <View style={styles.textInputContainer}>
-          <TextInput
-            style={styles.textInput}
-            secureTextEntry={true}
-            placeholder="Password"
-            onChangeText={(text) => this.setState({text})}
-          />
-        </View>
         <Button
-          containerStyle={styles.loginButtonContainer}
-          style={styles.loginButtonText}
+          containerStyle={styles.loginButton}
           styleDisabled={{color: 'red'}}
-          onPress={() => this.onClickLogin()}>
-          Log In
+          onPress={this.onClickFBLogin}>
+          <View style={styles.fbLogoContainer}>
+            <FontAwesomeIcon style={styles.fbLogo} name="facebook" size={20} color="#FFFFFF"/>
+            <Text style={styles.continueWithFbText}>Continue with Facebook</Text>
+          </View>
         </Button>
-        <Button style={styles.forgotPassword}>
-          Oh, no! Forgot Password?
-        </Button>
-        <Text style={styles.noAccount}>
-          Don't have a Peerex account?
-        </Text>
         <Button
           containerStyle={styles.signUpButtonContainer}
           style={styles.signUpButtonText}
           styleDisabled={{color: 'red'}}
-          onPress={() => this._handlePress()}>
-          Sign Up
+          onPress={this.onClickCreateAccount}>
+          Create Account
         </Button>
       </View>
     );
@@ -84,9 +82,24 @@ const styles = StyleSheet.create({
   logoPeerex: {
     marginTop: 68,
   },
+  fbLogoContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fbLogo: {
+    position: 'absolute',
+    left: 20,
+  },
+  continueWithFbText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    //fontFamily: Montserrat,
+  },
   welcome: {
     marginTop: 17,
-    marginBottom: 9,
+    marginBottom: 49,
     color: '#00A66C',
     //fontFamily: 'Montserrat', // TODO: fix fonts
     fontSize: 18,
@@ -103,20 +116,13 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 10,
   },
-  loginButtonContainer: {
+  loginButton: {
     marginTop: 20,
     height: 40,
     width: '90%',
     backgroundColor: '#21BE82',
     borderRadius: 4,
     overflow: 'hidden',
-  },
-  loginButtonText: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    //fontFamily: Montserrat,
-    marginTop: 11,
-    textAlign: 'center'
   },
   forgotPassword: {
     marginTop: 27,

@@ -82,5 +82,27 @@
       <string>SimpleLineIcons.ttf</string>
       <string>Zocial.ttf</string>
     </array>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>fb641651042711922</string>
+        </array>
+      </dict>
+    </array>
+    <key>FacebookAppID</key>
+    <string>641651042711922</string>
+    <key>FacebookDisplayName</key>
+    <string>peerex</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>fbapi</string>
+      <string>fb-messenger-api</string>
+      <string>fbauth2</string>
+      <string>fbshareextension</string>
+    </array>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Upload photos to peerex</string>
   </dict>
 </plist>
