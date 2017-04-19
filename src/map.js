@@ -10,6 +10,48 @@ import Button from 'react-native-button';
 import MapView from 'react-native-maps'; // GOTCHA: had to install babel-plugin-module-resolver to solve a bug! https://github.com/airbnb/react-native-maps/issues/795
 import SteppedInput from './components/steppedInput';
 
+const MERCHANTS = [
+  {
+    title: 'Wink Hostel',
+    description: '8A Mosque St , Chinatown, Singapore 059488',
+    latLong: {
+      latitude: 1.2840546,
+      longitude: 103.8441844,
+    },
+  },
+  {
+    title: 'Fernloft Chinatown',
+    description: '5 Banda St, Singapore 050005',
+    latLong: {
+      latitude: 1.2812237,
+      longitude: 103.8433654,
+    },
+  },
+  {
+    title: 'Backpackers\' Inn',
+    description: '27 Mosque Street, Singapore  059505',
+    latLong: {
+      latitude: 1.2834953,
+      longitude: 103.8455346,
+    },
+  },
+  {
+    title: 'Beds and Dreams Inn@ChinaTown',
+    description: '52 Temple St, Singapore 058597',
+    latLong: {
+      latitude: 1.2833648,
+      longitude: 103.8436216,
+    },
+  },
+  {
+    title: 'Maple Lodge',
+    description: '66 Pagoda St, Singapore 059225',
+    latLong: {
+      latitude: 1.283754,
+      longitude: 103.8439911,
+    },
+  },
+];
 export default class Map extends Component {
   //http://stackoverflow.com/questions/42261011/react-navigation-switching-background-colors-and-styling-stacknavigator
   static navigationOptions = {
@@ -29,24 +71,115 @@ export default class Map extends Component {
     }
   };
 
-  // TODO: https://gist.github.com/heron2014/e60fa003e9b117ce80d56bb1d5bfe9e0
+  constructor(props) {
+    super(props);
+
+    this.regionFrom = this.regionFrom.bind(this);
+  }
+
+  state = {
+    initialPosition: {
+      latitude: 1.282940, // hardcode to Tiong Bahru chicken rice
+      longitude: 103.843417,
+      accuracy: 5,
+    },
+    lastPosition: {
+      latitude: 0,
+      longitude: 0,
+      accuracy: 0,
+    },
+  };
+
+  componentDidMount() {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const {coords} = position;
+        this.setState({
+          initialPosition: {
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+            accuracy: coords.accuracy,
+          }
+        })
+      },
+      (error) => alert(JSON.stringify(error)),
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+        maximumAge: 1000
+      }
+    );
+
+    this.watchID = navigator.geolocation.watchPosition(position => {
+      const {coords} = position;
+      this.setState({
+        lastPosition: {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+        }
+      });
+    });
+  }
+
+  componentWillUnmount() {
+    navigator.geolocation.clearWatch(this.watchID);
+  }
+
+  // Ripped from https://github.com/airbnb/react-native-maps/issues/505
+  regionFrom(lat, lon, accuracy) {
+    const oneDegreeOfLongitudeInMeters = 111.32 * 1000;
+    const circumference = (40075 / 360) * 1000;
+
+    const accuracyZoomedOut = accuracy * 40;
+    const latDelta = accuracyZoomedOut * (1 / (Math.cos(lat) * circumference));
+    const lonDelta = (accuracyZoomedOut / oneDegreeOfLongitudeInMeters);
+
+    return {
+      latitude: lat,
+      longitude: lon,
+      latitudeDelta: Math.max(0, latDelta),
+      longitudeDelta: Math.max(0, lonDelta)
+    };
+  }
+
+  /**
+   * copy marker code from here: https://github.com/airbnb/react-native-maps/issues/725
+   *  <MapView.Marker
+       key={`marker-${index}`}
+       coordinate={{ latitude: Number(latitude), longitude: Number(longitude) }}
+       onPress={options.onPress ? () => options.onPress(marker) : false}
+       image={icons[marker.type] || icons.default}
+       style={styles.marker}
+       identifier={marker._id}
+     />
+   */
   render() {
+    const {initialPosition: {longitude, latitude, accuracy}} = this.state;
+    const initialRegion = this.regionFrom(latitude, longitude, accuracy);
+
     return (
       <View style={styles.root}>
         <SteppedInput />
         <View style={styles.textInputContainer}>
           <TextInput style={styles.locationTextInput} placeholder="location"/>
         </View>
+        { longitude !== 0 && latitude !== 0 &&
         <MapView
           style={styles.map}
           showsUserLocation={true}
-          initialRegion={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-        />
+          initialRegion={initialRegion}
+        >
+          {MERCHANTS.map((m, i) => (
+            <MapView.Marker
+              coordinate={m.latLong}
+              title={m.title}
+              description={m.description}
+              key={`marker-${i}`}
+            />
+          ))}
+        </MapView>
+        }
       </View>
     );
   }
@@ -86,4 +219,8 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  marker: {
+    height: 14,
+    width: 9.5,
+  }
 });
