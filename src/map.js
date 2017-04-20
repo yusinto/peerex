@@ -9,6 +9,7 @@ import {
 import Button from 'react-native-button';
 import MapView from 'react-native-maps'; // GOTCHA: had to install babel-plugin-module-resolver to solve a bug! https://github.com/airbnb/react-native-maps/issues/795
 import SteppedInput from './components/steppedInput';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 
 const MERCHANTS = [
   {
@@ -146,13 +147,13 @@ export default class Map extends Component {
   /**
    * copy marker code from here: https://github.com/airbnb/react-native-maps/issues/725
    *  <MapView.Marker
-       key={`marker-${index}`}
-       coordinate={{ latitude: Number(latitude), longitude: Number(longitude) }}
-       onPress={options.onPress ? () => options.onPress(marker) : false}
-       image={icons[marker.type] || icons.default}
-       style={styles.marker}
-       identifier={marker._id}
-     />
+   key={`marker-${index}`}
+   coordinate={{ latitude: Number(latitude), longitude: Number(longitude) }}
+   onPress={options.onPress ? () => options.onPress(marker) : false}
+   image={icons[marker.type] || icons.default}
+   style={styles.marker}
+   identifier={marker._id}
+   />
    */
   render() {
     const {initialPosition: {longitude, latitude, accuracy}} = this.state;
@@ -161,6 +162,59 @@ export default class Map extends Component {
     return (
       <View style={styles.root}>
         <SteppedInput />
+        <GooglePlacesAutocomplete
+          placeholder='Search'
+          minLength={2} // minimum length of text to search
+          autoFocus={false}
+          listViewDisplayed='auto'    // true/false/undefined
+          fetchDetails={true}
+          renderDescription={(row) => row.description} // custom description render
+          onPress={(data, details = null) => { // 'details' is provided when fetchDetails = true
+            console.log(data);
+            console.log(details);
+          }}
+          getDefaultValue={() => {
+            return ''; // text input default value
+          }}
+          query={{
+            // available options: https://developers.google.com/places/web-service/autocomplete
+            key: 'AIzaSyDbcaY5CwnzdvAjAQvg4QADfFOPEtWbR40',
+            language: 'en', // language of the results
+            //types: '(cities)', // don't specify types so all types are returned
+          }}
+          styles={{
+              textInputContainer: {
+                backgroundColor: 'rgba(0,0,0,0)',
+                borderTopWidth: 0,
+                borderBottomWidth:0,
+                width: '88%',
+              },
+              textInput: {
+                marginLeft: 0,
+                marginRight: 0,
+                height: 38,
+                color: '#5d5d5d',
+                fontSize: 16
+              },
+              predefinedPlacesDescription: {
+                color: '#1faadb'
+              },
+          }}
+          currentLocation={true} // Will add a 'Current location' button at the top of the predefined places list
+          currentLocationLabel="Current location"
+          nearbyPlacesAPI='GooglePlacesSearch' // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
+          GoogleReverseGeocodingQuery={{
+            // available options for GoogleReverseGeocoding API : https://developers.google.com/maps/documentation/geocoding/intro
+          }}
+          GooglePlacesSearchQuery={{
+            // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+            rankby: 'distance',
+            types: 'food',
+          }}
+          filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
+          //predefinedPlaces={[homePlace, workPlace]}
+          debounce={200} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
+        />
         <View style={styles.textInputContainer}>
           <TextInput style={styles.locationTextInput} placeholder="location"/>
         </View>
