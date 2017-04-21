@@ -76,6 +76,8 @@ export default class Map extends Component {
     super(props);
 
     this.regionFrom = this.regionFrom.bind(this);
+    this.onPressMarker = this.onPressMarker.bind(this);
+    this.markers = [];
   }
 
   state = {
@@ -142,6 +144,15 @@ export default class Map extends Component {
       latitudeDelta: Math.max(0, latDelta),
       longitudeDelta: Math.max(0, lonDelta)
     };
+  }
+
+  // TODO: change image to selected onpress marker.
+  onPressMarker(e, index) {
+    console.log(`marker pressed! ${e}, markerIndex: ${index}`);
+    const selectedMarker = this.markers[index];
+
+    //TODO: this does not work.
+    selectedMarker.image = require('../assets/images/map-marker-selected.png');
   }
 
   /**
@@ -230,6 +241,9 @@ export default class Map extends Component {
               title={m.title}
               description={m.description}
               key={`marker-${i}`}
+              ref={ref => this.markers[i] = ref}
+              image={require('../assets/images/map-marker.png')}
+              onPress={(e) => this.onPressMarker(e, i)}
             />
           ))}
         </MapView>
