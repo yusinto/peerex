@@ -11,6 +11,9 @@ import MapView from 'react-native-maps'; // GOTCHA: had to install babel-plugin-
 import SteppedInput from './components/steppedInput';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 
+const marker = require('../assets/images/map-marker.png');
+const selectedMarker = require('../assets/images/map-marker-selected.png');
+
 const MERCHANTS = [
   {
     title: 'Wink Hostel',
@@ -91,6 +94,7 @@ export default class Map extends Component {
       longitude: 0,
       accuracy: 0,
     },
+    selectedMarkerIndex: 0,
   };
 
   componentDidMount() {
@@ -146,13 +150,15 @@ export default class Map extends Component {
     };
   }
 
-  // TODO: change image to selected onpress marker.
   onPressMarker(e, index) {
     console.log(`marker pressed! ${e}, markerIndex: ${index}`);
     const selectedMarker = this.markers[index];
 
     //TODO: this does not work.
-    selectedMarker.image = require('../assets/images/map-marker-selected.png');
+    //selectedMarker.image = require('../assets/images/map-marker-selected.png');
+
+    this.setState({selectedMarkerIndex: index});
+    selectedMarker.showCallout();
   }
 
   /**
@@ -235,17 +241,25 @@ export default class Map extends Component {
           showsUserLocation={true}
           initialRegion={initialRegion}
         >
-          {MERCHANTS.map((m, i) => (
-            <MapView.Marker
-              coordinate={m.latLong}
-              title={m.title}
-              description={m.description}
-              key={`marker-${i}`}
-              ref={ref => this.markers[i] = ref}
-              image={require('../assets/images/map-marker.png')}
-              onPress={(e) => this.onPressMarker(e, i)}
-            />
-          ))}
+          {
+            MERCHANTS.map((m, i) => {
+                let markerImage = this.state.selectedMarkerIndex === i ? selectedMarker : marker;
+
+                return (
+                  <MapView.Marker
+                    coordinate={m.latLong}
+                    title={m.title}
+                    description={m.description}
+                    key={`marker-${i}`}
+                    ref={ref => this.markers[i] = ref}
+                    onPress={(e) => this.onPressMarker(e, i)}
+                  >
+                    <Image source={markerImage}/>
+                  </MapView.Marker>
+                );
+              }
+            )
+          }
         </MapView>
         }
       </View>
