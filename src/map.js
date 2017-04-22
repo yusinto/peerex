@@ -5,6 +5,7 @@ import {
   View,
   Image,
   TextInput,
+  FlatList,
 } from 'react-native';
 import Button from 'react-native-button';
 import MapView from 'react-native-maps'; // GOTCHA: had to install babel-plugin-module-resolver to solve a bug! https://github.com/airbnb/react-native-maps/issues/795
@@ -16,44 +17,54 @@ const selectedMarker = require('../assets/images/map-marker-selected.png');
 
 const MERCHANTS = [
   {
+    key: 'Wink Hostel',
     title: 'Wink Hostel',
     description: '8A Mosque St , Chinatown, Singapore 059488',
     latLong: {
       latitude: 1.2840546,
       longitude: 103.8441844,
     },
+    imageUrl: 'https://www.hotelsharbor.com/photos/Texas/Dallas/texas_dallas_hyatt_summerfield_suites_dallas_lincoln_park/hyatt_summerfield_suites_dallas_lincoln_park_dallas_1.jpg',
   },
   {
+    key: 'Fernloft Chinatown',
     title: 'Fernloft Chinatown',
     description: '5 Banda St, Singapore 050005',
     latLong: {
       latitude: 1.2812237,
       longitude: 103.8433654,
     },
+    imageUrl: 'https://tex.org/wp-content/uploads/2013/06/Comfort-Inn-Near-SeaWorld.jpg',
   },
   {
+    key: 'Backpackers\' Inn',
     title: 'Backpackers\' Inn',
     description: '27 Mosque Street, Singapore  059505',
     latLong: {
       latitude: 1.2834953,
       longitude: 103.8455346,
     },
+    imageUrl: 'https://images.trvl-media.com/hotels/7000000/6200000/6196500/6196500/6196500_382_z.jpg',
   },
   {
+    key: 'Beds and Dreams Inn@ChinaTown',
     title: 'Beds and Dreams Inn@ChinaTown',
     description: '52 Temple St, Singapore 058597',
     latLong: {
       latitude: 1.2833648,
       longitude: 103.8436216,
     },
+    imageUrl: 'https://s-media-cache-ak0.pinimg.com/236x/8a/8e/55/8a8e5530bfa905af20bab0d63d98ab46.jpg',
   },
   {
+    key: 'Maple Lodge',
     title: 'Maple Lodge',
     description: '66 Pagoda St, Singapore 059225',
     latLong: {
       latitude: 1.283754,
       longitude: 103.8439911,
     },
+    imageUrl: 'https://media-cdn.tripadvisor.com/media/photo-o/0a/c7/34/99/this-hotels-reflects.jpg',
   },
 ];
 export default class Map extends Component {
@@ -80,6 +91,7 @@ export default class Map extends Component {
 
     this.regionFrom = this.regionFrom.bind(this);
     this.onPressMarker = this.onPressMarker.bind(this);
+    this.renderMerchantTile = this.renderMerchantTile.bind(this);
     this.markers = [];
   }
 
@@ -159,6 +171,21 @@ export default class Map extends Component {
 
     this.setState({selectedMarkerIndex: index});
     selectedMarker.showCallout();
+  }
+
+  renderSeparator = () => {
+    return <View style={styles.merchantTileSeparator}/>;
+  };
+
+  renderMerchantTile(merchant) {
+    return (
+      <View style={styles.merchantTile}>
+        <Text style={styles.merchantTileTitle}>{merchant.title}</Text>
+        <Image style={styles.merchantImage}
+               source={{uri: merchant.imageUrl}}/>
+        <Text style={styles.merchantTileFooter}>100m away</Text>
+      </View>
+    );
   }
 
   /**
@@ -260,6 +287,13 @@ export default class Map extends Component {
               }
             )
           }
+          <FlatList
+            horizontal
+            style={styles.merchantTileContainer}
+            data={MERCHANTS}
+            ItemSeparatorComponent={this.renderSeparator}
+            renderItem={({item}) => this.renderMerchantTile(item)}
+          />
         </MapView>
         }
       </View>
@@ -268,6 +302,43 @@ export default class Map extends Component {
 }
 
 const styles = StyleSheet.create({
+  merchantTileFooter: {
+    marginTop: 6,
+    marginLeft: 10,
+    fontSize: 11,
+    color: '#383838',
+  },
+  merchantImage: {
+    height: 80,
+    width: 180,
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  merchantTileTitle: {
+    marginTop: 10,
+    marginLeft: 10,
+    fontSize: 13,
+    color: '#383838',
+    fontWeight: '500',
+  },
+  merchantTileSeparator: {
+    width: 15,
+  },
+  merchantTileContainer: {
+    position: 'absolute',
+    bottom: 10,
+    left: 15,
+    height: 150,
+    width: '100%',
+  },
+  merchantTile: {
+    backgroundColor: '#FFFFFF',
+    height: '100%',
+    width: 200,
+    borderTopWidth: 3,
+    borderTopColor: '#21BE82',
+    borderRadius: 2,
+  },
   root: {
     flex: 1,
     justifyContent: 'flex-start',
