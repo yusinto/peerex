@@ -164,12 +164,10 @@ export default class Map extends Component {
 
   onPressMarker(e, index) {
     console.log(`marker pressed! ${e}, markerIndex: ${index}`);
-    const selectedMarker = this.markers[index];
-
-    //TODO: this does not work.
-    //selectedMarker.image = require('../assets/images/map-marker-selected.png');
-
     this.setState({selectedMarkerIndex: index});
+
+    // maintain an array of all markers so we can get a reference to it
+    const selectedMarker = this.markers[index];
     selectedMarker.showCallout();
   }
 
@@ -263,28 +261,20 @@ export default class Map extends Component {
           <TextInput style={styles.locationTextInput} placeholder="location"/>
         </View>
         { longitude !== 0 && latitude !== 0 &&
-        <MapView
-          style={styles.map}
-          showsUserLocation={true}
-          initialRegion={initialRegion}
-        >
+        <MapView style={styles.map}
+                 showsUserLocation={true}
+                 initialRegion={initialRegion}>
           {
-            MERCHANTS.map((m, i) => {
-                let markerImage = this.state.selectedMarkerIndex === i ? selectedMarker : marker;
-
-                return (
-                  <MapView.Marker
-                    coordinate={m.latLong}
-                    title={m.title}
-                    description={m.description}
-                    key={`marker-${i}`}
-                    ref={ref => this.markers[i] = ref}
-                    onPress={(e) => this.onPressMarker(e, i)}
-                  >
-                    <Image source={markerImage}/>
-                  </MapView.Marker>
-                );
-              }
+            MERCHANTS.map((m, i) =>
+              <MapView.Marker
+                coordinate={m.latLong}
+                title={m.title}
+                description={m.description}
+                key={`marker-${i}`}
+                ref={ref => this.markers[i] = ref}
+                onPress={(e) => this.onPressMarker(e, i)}
+                image={this.state.selectedMarkerIndex === i ? selectedMarker : marker}
+              />
             )
           }
           <FlatList
