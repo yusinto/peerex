@@ -11,6 +11,7 @@ import Button from 'react-native-button';
 import MapView from 'react-native-maps'; // GOTCHA: had to install babel-plugin-module-resolver to solve a bug! https://github.com/airbnb/react-native-maps/issues/795
 import SteppedInput from './components/steppedInput';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import {colors} from './styles';
 
 const marker = require('../assets/images/map-marker.png');
 const selectedMarker = require('../assets/images/map-marker-selected.png');
@@ -75,14 +76,14 @@ export default class Map extends Component {
       visible: true,
       //left: null,  // TODO: replace this with hamburger slider menu
       style: {
-        backgroundColor: '#21BE82',
+        backgroundColor: colors.primary,
       },
       titleStyle: {
-        color: '#FFFFFF',
+        color: colors.white,
         fontSize: 16,
         fontWeight: '300',
       },
-      tintColor: '#FFFFFF',
+      tintColor: colors.white,
     }
   };
 
@@ -162,7 +163,7 @@ export default class Map extends Component {
     };
   }
 
-  onPressMarker(e, index: number) {
+  onPressMarker(e, index) {
     console.log(`marker pressed! ${e}, markerIndex: ${index}`);
     this.setState({selectedMerchantIndex: index});
     this.flatList.scrollToIndex({viewPosition: 0.5, index});
@@ -260,9 +261,6 @@ export default class Map extends Component {
           //predefinedPlaces={[homePlace, workPlace]}
           debounce={200} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
         />
-        <View style={styles.textInputContainer}>
-          <TextInput style={styles.locationTextInput} placeholder="location"/>
-        </View>
         { longitude !== 0 && latitude !== 0 &&
         <MapView style={styles.map}
                  showsUserLocation={true}
@@ -301,7 +299,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginLeft: 10,
     fontSize: 11,
-    color: '#383838',
+    color: colors.font,
   },
   merchantImage: {
     height: 80,
@@ -313,7 +311,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginLeft: 10,
     fontSize: 13,
-    color: '#383838',
+    color: colors.font,
     fontWeight: '500',
   },
   merchantTileSeparator: {
@@ -328,11 +326,11 @@ const styles = StyleSheet.create({
     paddingBottom: 10
   },
   merchantTile: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     height: '100%',
     width: 200,
     borderRadius: 2,
-    shadowColor: '#000000',
+    shadowColor: colors.black,
     shadowOffset: {
       width: 1.2,
       height: 3
@@ -341,13 +339,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.7
   },
   merchantTileSelected: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     height: '100%',
     width: 200,
     borderRadius: 2,
     borderTopWidth: 3,
-    borderTopColor: '#21BE82',
-    shadowColor: '#000000',
+    borderTopColor: colors.primary,
+    shadowColor: colors.black,
     shadowOffset: {
       width: 1.2,
       height: 3
@@ -359,7 +357,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#21BE82',
+    backgroundColor: colors.primary,
     width: '100%',
   },
   textInputContainer: {
@@ -370,7 +368,7 @@ const styles = StyleSheet.create({
     height: 42,
     paddingLeft: 20,
     paddingRight: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 4,
   },
   //locationTextInput: {
@@ -378,7 +376,7 @@ const styles = StyleSheet.create({
   //  height: 30,
   //  paddingLeft: 20,
   //  paddingRight: 20,
-  //  backgroundColor: '#00A76D',
+  //  backgroundColor: colors.primaryDark,
   //  borderRadius: 4,
   //},
   map: {

@@ -9,6 +9,7 @@ import {
 import Button from 'react-native-button';
 import {LoginButton, AccessToken, LoginManager} from 'react-native-fbsdk';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import {colors} from './styles';
 
 export default class Login extends Component {
   static navigationOptions = {
@@ -94,13 +95,13 @@ const styles = StyleSheet.create({
   },
   continueWithFbText: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: colors.white,
     //fontFamily: Montserrat,
   },
   welcome: {
     marginTop: 17,
     marginBottom: 49,
-    color: '#00A66C',
+    color: colors.primaryLight,
     //fontFamily: 'Montserrat', // TODO: fix fonts
     fontSize: 18,
   },
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     height: 42,
     width: '90%',
-    borderBottomColor: '#21BE82',
+    borderBottomColor: colors.primary,
     borderBottomWidth: 1,
   },
   textInput: {
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     height: 40,
     width: '90%',
-    backgroundColor: '#21BE82',
+    backgroundColor: colors.primary,
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -128,13 +129,13 @@ const styles = StyleSheet.create({
     marginTop: 27,
     fontSize: 12,
     fontWeight: '500',
-    color: '#383838',
+    color: colors.font,
   },
   noAccount: {
     marginTop: 61,
     fontSize: 12,
     fontWeight: '300',
-    color: '#383838',
+    color: colors.font,
   },
   signUpButtonContainer: {
     marginTop: 15,
@@ -143,11 +144,11 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#383838',
+    borderColor: colors.font,
   },
   signUpButtonText: {
     fontSize: 14,
-    color: '#383838',
+    color: colors.font,
     //fontFamily: Montserrat,
     marginTop: 11,
     textAlign: 'center'
