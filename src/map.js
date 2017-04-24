@@ -106,7 +106,7 @@ export default class Map extends Component {
       longitude: 0,
       accuracy: 0,
     },
-    selectedMarkerIndex: 0,
+    selectedMerchantIndex: 0,
   };
 
   componentDidMount() {
@@ -162,13 +162,14 @@ export default class Map extends Component {
     };
   }
 
-  onPressMarker(e, index) {
+  onPressMarker(e, index: number) {
     console.log(`marker pressed! ${e}, markerIndex: ${index}`);
-    this.setState({selectedMarkerIndex: index});
+    this.setState({selectedMerchantIndex: index});
+    this.flatList.scrollToIndex({viewPosition: 0.5, index});
 
     // maintain an array of all markers so we can get a reference to it
-    const selectedMarker = this.markers[index];
-    selectedMarker.showCallout();
+    //const selectedMarker = this.markers[index];
+    //selectedMarker.showCallout();
   }
 
   renderSeparator = () => {
@@ -176,8 +177,10 @@ export default class Map extends Component {
   };
 
   renderMerchantTile(merchant) {
+    const selectedMerchant = MERCHANTS[this.state.selectedMerchantIndex];
+
     return (
-      <View style={styles.merchantTile}>
+      <View style={selectedMerchant.key === merchant.key ? styles.merchantTileSelected : styles.merchantTile}>
         <Text style={styles.merchantTileTitle}>{merchant.title}</Text>
         <Image style={styles.merchantImage}
                source={{uri: merchant.imageUrl}}/>
@@ -234,7 +237,7 @@ export default class Map extends Component {
               textInput: {
                 marginLeft: 0,
                 marginRight: 0,
-                height: 38,
+                height: 34,
                 color: '#5d5d5d',
                 fontSize: 16
               },
@@ -273,15 +276,17 @@ export default class Map extends Component {
                 key={`marker-${i}`}
                 ref={ref => this.markers[i] = ref}
                 onPress={(e) => this.onPressMarker(e, i)}
-                image={this.state.selectedMarkerIndex === i ? selectedMarker : marker}
+                image={this.state.selectedMerchantIndex === i ? selectedMarker : marker}
               />
             )
           }
           <FlatList
             horizontal
-            style={styles.merchantTileContainer}
+            style={styles.merchantTilesContainer}
             data={MERCHANTS}
             ItemSeparatorComponent={this.renderSeparator}
+            extraData={this.state}
+            ref={ref => this.flatList = ref}
             renderItem={({item}) => this.renderMerchantTile(item)}
           />
         </MapView>
@@ -314,20 +319,41 @@ const styles = StyleSheet.create({
   merchantTileSeparator: {
     width: 15,
   },
-  merchantTileContainer: {
+  merchantTilesContainer: {
     position: 'absolute',
     bottom: 10,
     left: 15,
-    height: 150,
+    height: 160,
     width: '100%',
+    paddingBottom: 10
   },
   merchantTile: {
     backgroundColor: '#FFFFFF',
     height: '100%',
     width: 200,
+    borderRadius: 2,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 1.2,
+      height: 3
+    },
+    shadowRadius: 2,
+    shadowOpacity: 0.7
+  },
+  merchantTileSelected: {
+    backgroundColor: '#FFFFFF',
+    height: '100%',
+    width: 200,
+    borderRadius: 2,
     borderTopWidth: 3,
     borderTopColor: '#21BE82',
-    borderRadius: 2,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 1.2,
+      height: 3
+    },
+    shadowRadius: 2,
+    shadowOpacity: 0.4
   },
   root: {
     flex: 1,
@@ -347,17 +373,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 4,
   },
-  locationTextInput: {
-    marginTop: 10,
-    height: 42,
-    paddingLeft: 20,
-    paddingRight: 20,
-    backgroundColor: '#00A76D',
-    borderRadius: 4,
-  },
+  //locationTextInput: {
+  //  marginTop: 10,
+  //  height: 30,
+  //  paddingLeft: 20,
+  //  paddingRight: 20,
+  //  backgroundColor: '#00A76D',
+  //  borderRadius: 4,
+  //},
   map: {
     position: 'absolute',
-    top: 115,
+    top: 90,
     left: 0,
     right: 0,
     bottom: 0,
