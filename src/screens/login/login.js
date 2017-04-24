@@ -8,8 +8,8 @@ import {
 } from 'react-native';
 import Button from 'react-native-button';
 import {LoginButton, AccessToken, LoginManager} from 'react-native-fbsdk';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import {colors} from './styles';
+import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/FontAwesome';
+import {colors} from './../../styles';
 
 export default class Login extends Component {
   static navigationOptions = {
@@ -49,7 +49,7 @@ export default class Login extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Image source={require('../assets/images/logo-peerex.png')} style={styles.logoPeerex}/>
+        <Image source={require('../../../assets/images/logo-peerex.png')} style={styles.logoPeerex}/>
         <Text style={styles.welcome}>
           Welcome to Peerex
         </Text>
