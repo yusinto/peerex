@@ -1,0 +1,52 @@
+[
+  {
+    "key": "Wink Hostel",
+    "title": "Wink Hostel",
+    "description": "8A Mosque St , Chinatown, Singapore 059488",
+    "latLong": {
+      "latitude": 1.2840546,
+      "longitude": 103.8441844
+    },
+    "imageUrl": "https://www.hotelsharbor.com/photos/Texas/Dallas/texas_dallas_hyatt_summerf…las_lincoln_park/hyatt_summerfield_suites_dallas_lincoln_park_dallas_1.jpg"
+  },
+  {
+    "key": "Fernloft Chinatown",
+    "title": "Fernloft Chinatown",
+    "description": "5 Banda St, Singapore 050005",
+    "latLong": {
+      "latitude": 1.2812237,
+      "longitude": 103.8433654
+    },
+    "imageUrl": "https://tex.org/wp-content/uploads/2013/06/Comfort-Inn-Near-SeaWorld.jpg"
+  },
+  {
+    "key": "Backpackers' Inn",
+    "title": "Backpackers' Inn",
+    "description": "27 Mosque Street, Singapore  059505",
+    "latLong": {
+      "latitude": 1.2834953,
+      "longitude": 103.8455346
+    },
+    "imageUrl": "https://images.trvl-media.com/hotels/7000000/6200000/6196500/6196500/6196500_382_z.jpg"
+  },
+  {
+    "key": "Beds and Dreams Inn@ChinaTown",
+    "title": "Beds and Dreams Inn@ChinaTown",
+    "description": "52 Temple St, Singapore 058597",
+    "latLong": {
+      "latitude": 1.2833648,
+      "longitude": 103.8436216
+    },
+    "imageUrl": "https://s-media-cache-ak0.pinimg.com/236x/8a/8e/55/8a8e5530bfa905af20bab0d63d98ab46.jpg"
+  },
+  {
+    "key": "Maple Lodge",
+    "title": "Maple Lodge",
+    "description": "66 Pagoda St, Singapore 059225",
+    "latLong": {
+      "latitude": 1.283754,
+      "longitude": 103.8439911
+    },
+    "imageUrl": "https://media-cdn.tripadvisor.com/media/photo-o/0a/c7/34/99/this-hotels-reflects.jpg"
+  }
+]

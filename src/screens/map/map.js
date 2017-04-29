@@ -13,62 +13,11 @@ import SteppedInput from './../../components/steppedInput';
 import GooglePlaces from './googlePlaces';
 import {colors} from './../../styles';
 import MerchantTile from './merchantTile';
+import MERCHANTS from '../../data/merchants.json';
 
 const marker = require('../../../assets/images/map-marker.png');
 const selectedMarker = require('../../../assets/images/map-marker-selected.png');
 
-const MERCHANTS = [
-  {
-    key: 'Wink Hostel',
-    title: 'Wink Hostel',
-    description: '8A Mosque St , Chinatown, Singapore 059488',
-    latLong: {
-      latitude: 1.2840546,
-      longitude: 103.8441844,
-    },
-    imageUrl: 'https://www.hotelsharbor.com/photos/Texas/Dallas/texas_dallas_hyatt_summerfield_suites_dallas_lincoln_park/hyatt_summerfield_suites_dallas_lincoln_park_dallas_1.jpg',
-  },
-  {
-    key: 'Fernloft Chinatown',
-    title: 'Fernloft Chinatown',
-    description: '5 Banda St, Singapore 050005',
-    latLong: {
-      latitude: 1.2812237,
-      longitude: 103.8433654,
-    },
-    imageUrl: 'https://tex.org/wp-content/uploads/2013/06/Comfort-Inn-Near-SeaWorld.jpg',
-  },
-  {
-    key: 'Backpackers\' Inn',
-    title: 'Backpackers\' Inn',
-    description: '27 Mosque Street, Singapore  059505',
-    latLong: {
-      latitude: 1.2834953,
-      longitude: 103.8455346,
-    },
-    imageUrl: 'https://images.trvl-media.com/hotels/7000000/6200000/6196500/6196500/6196500_382_z.jpg',
-  },
-  {
-    key: 'Beds and Dreams Inn@ChinaTown',
-    title: 'Beds and Dreams Inn@ChinaTown',
-    description: '52 Temple St, Singapore 058597',
-    latLong: {
-      latitude: 1.2833648,
-      longitude: 103.8436216,
-    },
-    imageUrl: 'https://s-media-cache-ak0.pinimg.com/236x/8a/8e/55/8a8e5530bfa905af20bab0d63d98ab46.jpg',
-  },
-  {
-    key: 'Maple Lodge',
-    title: 'Maple Lodge',
-    description: '66 Pagoda St, Singapore 059225',
-    latLong: {
-      latitude: 1.283754,
-      longitude: 103.8439911,
-    },
-    imageUrl: 'https://media-cdn.tripadvisor.com/media/photo-o/0a/c7/34/99/this-hotels-reflects.jpg',
-  },
-];
 export default class Map extends Component {
   //http://stackoverflow.com/questions/42261011/react-navigation-switching-background-colors-and-styling-stacknavigator
   static navigationOptions = {
@@ -164,8 +113,24 @@ export default class Map extends Component {
     };
   }
 
+  renderSeparator = () => {
+    return <View style={styles.merchantTileSeparator}/>;
+  };
+
+  renderMerchantTile(merchant, index) {
+    const selectedMerchant = MERCHANTS[this.state.selectedMerchantIndex];
+
+    return (
+      <MerchantTile
+        onPress={this.onPressFlatListItem}
+        merchant={merchant}
+        merchantIndex={index}
+        isSelected={selectedMerchant.key === merchant.key}
+      />
+    );
+  }
+
   onPressMarker(e, index) {
-    console.log(`marker pressed! ${e}, markerIndex: ${index}`);
     this.setState({selectedMerchantIndex: index});
     this.flatList.scrollToIndex({viewPosition: 0.5, index});
 
@@ -174,19 +139,13 @@ export default class Map extends Component {
     //selectedMarker.showCallout();
   }
 
-  renderSeparator = () => {
-    return <View style={styles.merchantTileSeparator}/>;
+  onPressFlatListItem = (index) => {
+    // TODO: open merchant details page instead of selecting markers
+    this.props.navigation.navigate('Merchant', {index: index});
+
+    //this.setState({selectedMerchantIndex: index});
+    //this.flatList.scrollToIndex({viewPosition: 0.5, index});
   };
-
-  renderMerchantTile(merchant) {
-    const selectedMerchant = MERCHANTS[this.state.selectedMerchantIndex];
-
-    return (
-      <MerchantTile
-        merchant={merchant}
-        isSelected={selectedMerchant.key === merchant.key}/>
-    );
-  }
 
   render() {
     const {initialPosition: {longitude, latitude, accuracy}} = this.state;
@@ -198,9 +157,11 @@ export default class Map extends Component {
         <GooglePlaces />
         {
           longitude !== 0 && latitude !== 0 &&
-          <MapView style={styles.map}
-                   showsUserLocation={true}
-                   initialRegion={initialRegion}>
+          <MapView
+            ref={ref => this.map = ref}
+            style={styles.map}
+            showsUserLocation={true}
+            initialRegion={initialRegion}>
             {
               MERCHANTS.map((m, i) =>
                 <MapView.Marker
@@ -221,7 +182,7 @@ export default class Map extends Component {
               ItemSeparatorComponent={this.renderSeparator}
               extraData={this.state}
               ref={ref => this.flatList = ref}
-              renderItem={({item}) => this.renderMerchantTile(item)}
+              renderItem={({item, index}) => this.renderMerchantTile(item, index)}
             />
           </MapView>
         }
@@ -251,7 +212,7 @@ const styles = StyleSheet.create({
   },
   map: {
     position: 'absolute',
-    top: 190,
+    top: 90,
     left: 0,
     right: 0,
     bottom: 0,
