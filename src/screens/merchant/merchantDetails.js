@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Icon,
 } from 'react-native';
+import Button from 'react-native-button';
 import {colors} from '../../styles';
 import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/FontAwesome';
 import MERCHANTS from '../../data/merchants.json';
@@ -60,6 +61,18 @@ export default class MerchantDetails extends Component {
           You will only be charged after you have picked up
           the cash from this merchant
         </Text>
+        <View style={styles.footerButtonContainer}>
+          <Button
+            containerStyle={[styles.button, {backgroundColor: colors.secondary}]}
+            onPress={this.onClickCallMerchant}>
+            <Text style={styles.buttonText}>Call Merchant</Text>
+          </Button>
+          <Button
+            containerStyle={[styles.button, {backgroundColor: colors.primary}]}
+            onPress={this.onClickGetCashNow}>
+            <Text style={styles.buttonText}>Get Cash Now</Text>
+          </Button>
+        </View>
       </View>
     );
   }
@@ -98,10 +111,11 @@ const styles = StyleSheet.create({
   },
   requestSummaryContainer: {
     marginTop: 8,
-    height: 200,
+    height: 210,
     width: '100%',
     backgroundColor: colors.white,
     padding: 25,
+    paddingTop: 20,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     borderBottomWidth: 1,
@@ -110,12 +124,13 @@ const styles = StyleSheet.create({
   summary: {
     fontSize: 10,
     color: colors.font,
+    marginBottom: 5,
   },
   summaryItemContainer: {
-    flexGrow: 0.1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    height: 36,
     width: '100%',
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -141,5 +156,27 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.font,
     textAlign: 'center',
-  }
+    paddingLeft: 10,
+    paddingRight: 10,
+  },
+  footerButtonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'stretch',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  button: {
+    flex: 1,
+    justifyContent: 'center',
+    height: 52,
+    width: '50%',
+  },
+  buttonText: {
+    color: colors.white,
+    textAlign: 'center',
+  },
 });
