@@ -14,9 +14,7 @@ import {colors} from './../../styles';
 export default class Login extends Component {
   static navigationOptions = {
     title: 'Welcome',
-    header: {
-      visible: false,
-    }
+    header: null,
   };
 
   constructor(props) {

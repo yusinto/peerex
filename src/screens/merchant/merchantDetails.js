@@ -12,17 +12,16 @@ import {colors} from '../../styles';
 import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/FontAwesome';
 import MERCHANTS from '../../data/merchants.json';
 
-//const BackNavigation = (props) =>
-//  <TouchableOpacity onPress={() => props.goBack()}>
-//    <FontAwesomeIcon style={{position: 'absolute', left: 13}} name="chevron-left" size={20} color="#FFFFFF"/>
-//  </TouchableOpacity>;
-
 export default class MerchantDetails extends Component {
-  static navigationOptions = {
-    title: '',
-    header: {
-      visible: false,
-    },
+  static navigationOptions = ({ navigation, screenProps }) => {
+    return {
+      title: null,
+      header: null,
+    };
+  };
+
+  onPressBack = () => {
+    this.props.navigation.goBack();
   };
 
   render() {
@@ -34,6 +33,9 @@ export default class MerchantDetails extends Component {
     return (
       <View style={styles.root}>
         <Image style={styles.merchantImage} source={{uri: merchant.imageUrl}}/>
+        <TouchableOpacity style={styles.backContainer} onPress={this.onPressBack}>
+          <FontAwesomeIcon name="chevron-left" size={20} color="#FFFFFF"/>
+        </TouchableOpacity>
         <View style={styles.merchantDetailsContainer}>
           <Text style={styles.merchantTitle}>{merchant.title}</Text>
           <Text style={styles.merchantAddress}>{merchant.description}</Text>
@@ -79,6 +81,12 @@ export default class MerchantDetails extends Component {
 }
 
 const styles = StyleSheet.create({
+  backContainer: {
+    position: 'absolute',
+    top: 30,
+    left: 22,
+    backgroundColor: 'transparent',
+  },
   root: {
     flex: 1,
     justifyContent: 'flex-start',

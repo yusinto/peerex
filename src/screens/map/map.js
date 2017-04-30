@@ -22,19 +22,15 @@ export default class Map extends Component {
   //http://stackoverflow.com/questions/42261011/react-navigation-switching-background-colors-and-styling-stacknavigator
   static navigationOptions = {
     title: 'How much do you need?',
-    header: {
-      visible: true,
-      //left: null,  // TODO: replace this with hamburger slider menu
-      style: {
-        backgroundColor: colors.primary,
-      },
-      titleStyle: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: '300',
-      },
-      tintColor: colors.white,
-    }
+    headerStyle: {
+      backgroundColor: colors.primary,
+    },
+    headerTitleStyle: {
+      color: colors.white,
+      fontSize: 16,
+      fontWeight: '300',
+    },
+    //headerLeft: TODO: hamburger slide out menu
   };
 
   constructor(props) {

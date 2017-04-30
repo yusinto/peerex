@@ -5,7 +5,7 @@
  */
 
 import {AppRegistry} from 'react-native';
-import {StackNavigator} from 'react-navigation'; // GOTCHA: v1.0.0beta is broken, so we have to use a custom commit for now https://github.com/react-community/react-navigation/issues/923
+import {StackNavigator} from 'react-navigation';
 import Login from './src/screens/login/login';
 import Map from './src/screens/map/map';
 import Merchant from './src/screens/merchant/merchantDetails';
