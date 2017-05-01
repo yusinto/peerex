@@ -7,34 +7,42 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import {DefaultWithdrawAmount, MinWithdrawAmount, MaxWithdrawAmount} from '../constants';
+import {updateMap} from '../screens/map/mapActions';
+import { connect } from 'react-redux';
 
-export default class SteppedInput extends Component {
+const mapStateToProps = (state) => {
+  return {
+    withdrawAmount: state.map.withdrawAmount,
+  };
+};
+
+class SteppedInput extends Component {
   constructor(props) {
     super(props);
     this._onPressDecrement = this._onPressDecrement.bind(this);
     this._onPressIncrement = this._onPressIncrement.bind(this);
   }
 
-  state = {
-    amount: 30,
-  };
-
   _onPressDecrement() {
-    const amount = this.state.amount - 10;
-    this.setState({amount});
-
+    if (this.props.withdrawAmount > MinWithdrawAmount) {
+      const withdrawAmount = this.props.withdrawAmount - 10;
+      this.props.updateMapAction({withdrawAmount});
+    }
   }
 
   _onPressIncrement() {
-    const amount = this.state.amount + 10;
-    this.setState({amount});
+    if(this.props.withdrawAmount < MaxWithdrawAmount) {
+      const withdrawAmount = this.props.withdrawAmount + 10;
+      this.props.updateMapAction({withdrawAmount});
+    }
   }
 
   render() {
     return (
       <View style={styles.root}>
         <TextInput style={styles.currency} defaultValue="SGD"/>
-        <TextInput style={styles.textInput} value={this.state.amount.toString()}/>
+        <TextInput style={styles.textInput} value={this.props.withdrawAmount.toString()}/>
         <View style={styles.plusMinusContainer}>
           <TouchableOpacity
             onPress={this._onPressDecrement}
@@ -92,3 +100,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export default connect(mapStateToProps, {updateMapAction: updateMap})(SteppedInput);

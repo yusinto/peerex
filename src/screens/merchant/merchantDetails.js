@@ -11,8 +11,16 @@ import Button from 'react-native-button';
 import {colors} from '../../styles';
 import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/FontAwesome';
 import MERCHANTS from '../../data/merchants.json';
+import { connect } from 'react-redux';
+import {PeerexFeeInt} from '../../constants';
 
-export default class MerchantDetails extends Component {
+const mapStateToProps = (state) => {
+  return {
+    withdrawAmount: state.map.withdrawAmount,
+  };
+};
+
+class MerchantDetails extends Component {
   static navigationOptions = ({ navigation, screenProps }) => {
     return {
       title: null,
@@ -25,10 +33,11 @@ export default class MerchantDetails extends Component {
   };
 
   render() {
-    //TODO: params doesn't work!
-    console.log(`navigation: ${JSON.stringify(this.props.navigation)}`);
-    //const merchant = MERCHANTS[this.props.navigation.state.params.index];
-    const merchant = MERCHANTS[0];
+    const merchant = MERCHANTS[this.props.navigation.state.params.index];
+    //const merchant = MERCHANTS[0];
+    const {withdrawAmount} = this.props;
+    const serviceFee = withdrawAmount * (PeerexFeeInt / 100);
+    const total = serviceFee + withdrawAmount;
 
     return (
       <View style={styles.root}>
@@ -44,15 +53,15 @@ export default class MerchantDetails extends Component {
           <Text style={styles.summary}>Summary</Text>
           <View style={styles.summaryItemContainer}>
             <Text style={styles.requestedCash}>Requested Cash</Text>
-            <Text style={styles.requestedAmount}>SGD 30.00</Text>
+            <Text style={styles.requestedAmount}>SGD {this.props.withdrawAmount.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryItemContainer}>
             <Text style={styles.label}>Service Fee</Text>
-            <Text style={styles.amount}>SGD 2.10</Text>
+            <Text style={styles.amount}>SGD {serviceFee.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryItemContainer}>
             <Text style={styles.label}>Total Payment</Text>
-            <Text style={styles.amount}>SGD 32.10</Text>
+            <Text style={styles.amount}>SGD {total.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryItemContainer}>
             <Text style={styles.label}>Charged to</Text>
@@ -188,3 +197,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export default connect(mapStateToProps)(MerchantDetails);
