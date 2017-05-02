@@ -41,8 +41,8 @@ class SteppedInput extends Component {
   render() {
     return (
       <View style={styles.root}>
-        <TextInput style={styles.currency} defaultValue="SGD"/>
-        <TextInput style={styles.textInput} value={this.props.withdrawAmount.toString()}/>
+        <Text style={styles.currency}>SGD</Text>
+        <Text style={styles.textInput}>{this.props.withdrawAmount.toString()}</Text>
         <View style={styles.plusMinusContainer}>
           <TouchableOpacity
             onPress={this._onPressDecrement}
