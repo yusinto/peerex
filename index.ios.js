@@ -11,7 +11,7 @@ import Merchant from './src/screens/merchant/merchantDetails';
 const store = createStore();
 const Navigator = StackNavigator(
   {
-    //Login: {screen: Login},
+    Login: {screen: Login},
     Map: {screen: Map},
     Merchant: {screen: Merchant},
   },
