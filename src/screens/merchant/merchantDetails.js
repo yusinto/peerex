@@ -32,6 +32,10 @@ class MerchantDetails extends Component {
     this.props.navigation.goBack();
   };
 
+  addCard = () => {
+    alert('add card pls');
+  };
+
   render() {
     const merchant = MERCHANTS[this.props.navigation.state.params.index];
     //const merchant = MERCHANTS[0];
@@ -43,7 +47,7 @@ class MerchantDetails extends Component {
       <View style={styles.root}>
         <Image style={styles.merchantImage} source={{uri: merchant.imageUrl}}/>
         <TouchableOpacity style={styles.backContainer} onPress={this.onPressBack}>
-          <FontAwesomeIcon name="chevron-left" size={20} color="#FFFFFF"/>
+          <FontAwesomeIcon name="chevron-left" size={28} color="#FFFFFF"/>
         </TouchableOpacity>
         <View style={styles.merchantDetailsContainer}>
           <Text style={styles.merchantTitle}>{merchant.title}</Text>
@@ -63,10 +67,12 @@ class MerchantDetails extends Component {
             <Text style={styles.label}>Total Payment</Text>
             <Text style={styles.amount}>SGD {total.toFixed(2)}</Text>
           </View>
-          <View style={styles.summaryItemContainer}>
-            <Text style={styles.label}>Charged to</Text>
-            <Text style={styles.amount}>****8884</Text>
-          </View>
+          <TouchableOpacity onPress={this.addCard}>
+            <View style={styles.summaryItemContainer}>
+              <Text style={styles.label}>Charge to</Text>
+              <Text style={styles.label}>add a card</Text>
+            </View>
+          </TouchableOpacity>
         </View>
         <Text style={styles.footerText}>
           You will only be charged after you have picked up

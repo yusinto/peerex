@@ -31,6 +31,9 @@ export default class Login extends Component {
         } else {
           AccessToken.getCurrentAccessToken().then(data => {
             //alert(`FB login success! ${data.accessToken.toString()}`);
+
+            // TODO: save token
+
             this.props.navigation.navigate('Map');
           });
         }
