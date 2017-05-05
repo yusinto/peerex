@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Icon,
+  Modal,
 } from 'react-native';
 import Button from 'react-native-button';
 import {colors} from '../../styles';
@@ -13,6 +14,7 @@ import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/Fon
 import MERCHANTS from '../../data/merchants.json';
 import { connect } from 'react-redux';
 import {PeerexFeeInt} from '../../constants';
+import { StripeAddCard } from 'react-native-checkout'
 
 const mapStateToProps = (state) => {
   return {
@@ -28,12 +30,29 @@ class MerchantDetails extends Component {
     };
   };
 
+  state = {
+    modalVisible: false,
+    cardToken: null,
+  };
+
   onPressBack = () => {
     this.props.navigation.goBack();
   };
 
   addCard = () => {
-    alert('add card pls');
+    this.setState({modalVisible: !this.state.modalVisible});
+  };
+
+  onAddCardSuccessful = (token) => {
+    //TODO: save token to graphcool against customer's login
+    this.setState({
+      modalVisible: false,
+      cardToken: token,
+    });
+  };
+
+  onClickGetCashNow = () => {
+    alert('todo');
   };
 
   render() {
@@ -70,7 +89,12 @@ class MerchantDetails extends Component {
           <TouchableOpacity onPress={this.addCard}>
             <View style={styles.summaryItemContainer}>
               <Text style={styles.label}>Charge to</Text>
-              <Text style={styles.label}>add a card</Text>
+              {
+                this.state.cardToken ?
+                  <Text style={styles.label}></Text>
+                  :
+                  <Text style={styles.label}>add a card</Text>
+              }
             </View>
           </TouchableOpacity>
         </View>
@@ -90,12 +114,49 @@ class MerchantDetails extends Component {
             <Text style={styles.buttonText}>Get Cash Now</Text>
           </Button>
         </View>
+        <Modal
+          animationType={"slide"}
+          transparent={false}
+          visible={this.state.modalVisible}
+          onRequestClose={() => {alert("Modal has been closed.")}}
+        >
+          <StripeAddCard
+            publicStripeKey="pk_test_SCmjTpTsIyclK12cSKCjtaUt"
+            addCardHandler={(cardNumber, cardExpiry, cardCvc) => {
+              console.log(`${cardNumber} ${cardExpiry} ${cardCvc}`);
+              return Promise.resolve(cardNumber); //return a promise when you're done
+            }}
+            addCardTokenHandler={this.onAddCardSuccessful}
+            styles={{
+               addCardContainer: {
+                flex: 1,
+                justifyContent: 'center',
+                backgroundColor: '#F2F2F5',
+              },
+            }}
+            onCardNumberBlur={() => console.log('card number blurred')}
+            onCardNumberFocus={() => console.log('card number focused')}
+            onCvcFocus={() => console.log('cvc focused')}
+            onCvcBlur={() => console.log('cvc blurred')}
+            onExpiryFocus={() => console.log('expiry focused')}
+            onExpiryBlur={() => console.log('expiry blurred')}
+            onScanCardClose={() => console.log('scan card closed')}
+            onScanCardOpen={() => console.log('scan card opened')}
+            activityIndicatorColor="pink"
+            addCardButtonText="Add Card"
+            scanCardButtonText="Scan Card"
+            scanCardAfterScanButtonText="Scan Card Again"
+          />
+        </Modal>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  addCardModal: {
+    top: 50,
+  },
   backContainer: {
     position: 'absolute',
     top: 30,
