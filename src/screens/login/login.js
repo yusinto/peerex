@@ -10,9 +10,8 @@ import Button from 'react-native-button';
 import {LoginButton, AccessToken, LoginManager} from 'react-native-fbsdk';
 import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/FontAwesome';
 import {colors} from './../../styles';
-
-// GoogleSignin
-import {GoogleSignin, GoogleSigninButton} from 'react-native-google-signin';
+import {GoogleSignin} from 'react-native-google-signin';
+import {GoogleSigniniOSClientID} from '../../constants';
 
 export default class Login extends Component {
   static navigationOptions = {
@@ -24,12 +23,9 @@ export default class Login extends Component {
     super(props);
     this.onClickFBLogin = this.onClickFBLogin.bind(this);
     this.onClickCreateAccount = this.onClickCreateAccount.bind(this);
-    //GoogleSignin
     this.onClickGoogleLogin = this.onClickGoogleLogin.bind(this);
-
   }
 
-  //for GoogleSignin
   componentDidMount() {
     this._setupGoogleSignin();
   }
@@ -55,12 +51,11 @@ export default class Login extends Component {
     try {
       await GoogleSignin.hasPlayServices({ autoResolve: true }); // for android, always true for iOS
       await GoogleSignin.configure({
-        iosClientId: '887069304838-jd9tbd6rlrrgk03tkjvemmffdjifsodh.apps.googleusercontent.com',
+        iosClientId: GoogleSigniniOSClientID,
         //webClientId: '887069304838-tcgm31avgod3pgigi9qrfjnaugssj2bq.apps.googleusercontent.com',
         // offlineAccess: false
       });
 
-      //to get user if already logged in, null if not signed in
       const user = await GoogleSignin.currentUserAsync();
       console.log(user);
       this.setState({user});
@@ -71,12 +66,8 @@ export default class Login extends Component {
   }
 
     onClickGoogleLogin() {
-
-      //if there's no user logged in, Prompt the browser to direct to Google Signin screen
       if (!this.state.user) {
-
         GoogleSignin.signIn()
-        //if googlesignin is succcessful then do this
         .then((user) => {
           console.log(user);
           this.setState({user: user});
@@ -85,16 +76,12 @@ export default class Login extends Component {
         .catch((err) => {
           console.log('WRONG SIGNIN', err);
         })
-        //when done button is clicked in googlesignin browser, do this
         .done();
       }
-     // if user is logged in already, show this
      if (this.state.user) {
-            this.props.navigation.navigate('Map');
+        this.props.navigation.navigate('Map');
       }
     }
-  // end of GoogleSignin
-
 
   onClickCreateAccount() {
     // TODO: create account
