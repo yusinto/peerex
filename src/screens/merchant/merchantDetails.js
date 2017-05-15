@@ -33,17 +33,25 @@ class MerchantDetails extends Component {
   state = {
     modalVisible: false,
     cardToken: null,
+    cardNumber: null,
   };
 
   onPressBack = () => {
     this.props.navigation.goBack();
   };
 
-  addCard = () => {
+  onPressAddCard = () => {
     this.setState({modalVisible: !this.state.modalVisible});
   };
 
-  onAddCardSuccessful = (token) => {
+  //onAddCardSuccessful = (cardNumber, cardExpiry, cardCvc) => {
+  //  console.log(`${cardNumber} ${cardExpiry} ${cardCvc}`);
+  //  this.setState({cardNumber});
+  //  return Promise.resolve(cardNumber); //return a promise when you're done
+  //};
+
+  onGetCardToken = (token) => {
+    console.log(`stripe token: ${token}`);
     //TODO: save token to graphcool against customer's login
     this.setState({
       modalVisible: false,
@@ -86,12 +94,12 @@ class MerchantDetails extends Component {
             <Text style={styles.label}>Total Payment</Text>
             <Text style={styles.amount}>SGD {total.toFixed(2)}</Text>
           </View>
-          <TouchableOpacity onPress={this.addCard}>
+          <TouchableOpacity onPress={this.onPressAddCard}>
             <View style={styles.summaryItemContainer}>
               <Text style={styles.label}>Charge to</Text>
               {
-                this.state.cardToken ?
-                  <Text style={styles.label}></Text>
+                this.state.cardNumber ?
+                  <Text style={styles.label}>{this.state.cardNumber}</Text>
                   :
                   <Text style={styles.label}>add a card</Text>
               }
@@ -122,11 +130,7 @@ class MerchantDetails extends Component {
         >
           <StripeAddCard
             publicStripeKey="pk_test_SCmjTpTsIyclK12cSKCjtaUt"
-            addCardHandler={(cardNumber, cardExpiry, cardCvc) => {
-              console.log(`${cardNumber} ${cardExpiry} ${cardCvc}`);
-              return Promise.resolve(cardNumber); //return a promise when you're done
-            }}
-            addCardTokenHandler={this.onAddCardSuccessful}
+            addCardTokenHandler={this.onGetCardToken}
             styles={{
                addCardContainer: {
                 flex: 1,

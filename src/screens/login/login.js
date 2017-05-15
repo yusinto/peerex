@@ -32,7 +32,10 @@ export default class Login extends Component {
           AccessToken.getCurrentAccessToken().then(data => {
             //alert(`FB login success! ${data.accessToken.toString()}`);
 
-            // TODO: save token
+            //https://www.graph.cool/docs/tutorials/stripe-payments-with-mutation-callbacks-using-micro-and-now-soiyaquah7/
+            // https://stripe.com/docs/mobile/ios/standard
+            // TODO: save token to redux
+            // TODO: create/retrieve stripe customer
 
             this.props.navigation.navigate('Map');
           });
