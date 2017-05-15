@@ -7,14 +7,46 @@ import {
   TextInput,
 } from 'react-native';
 import Button from 'react-native-button';
-import {LoginButton, AccessToken, LoginManager} from 'react-native-fbsdk';
+import {LoginButton, AccessToken, LoginManager, GraphRequest, GraphRequestManager} from 'react-native-fbsdk';
 import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/FontAwesome';
 import {colors} from './../../styles';
+import { graphql } from 'react-apollo'
+import gql from 'graphql-tag'
+import {updateLogin} from './loginActions';
+import { connect } from 'react-redux';
 
-export default class Login extends Component {
+const query = gql`
+query CustomerQuery ($email: String!) {
+  allCustomers(filter: {email: $email}) {
+    email
+    loginType
+    loginToken
+    stripeCustomerId
+  }
+}`;
+
+const mapStateToProps = (state) => {
+  const {login} = state;
+  return {
+    email: login.email,
+    loginType: login.loginType,
+    loginToken: login.loginToken,
+    stripeCustomerId: login.stripeCustomerId,
+  };
+};
+
+class Login extends Component {
   static navigationOptions = {
     title: 'Welcome',
     header: null,
+  };
+
+  static propTypes = {
+    data: PropTypes.shape({
+      loading: PropTypes.bool,
+      error: PropTypes.object,
+      allCustomers: PropTypes.array,
+    }),
   };
 
   constructor(props) {
@@ -27,19 +59,61 @@ export default class Login extends Component {
     LoginManager.logInWithReadPermissions(['email', 'public_profile']).then(
       result => {
         if (result.isCancelled) {
-          alert('FB login cancelled');
+          console.log('FB login cancelled');
         } else {
           AccessToken.getCurrentAccessToken().then(data => {
-            //alert(`FB login success! ${data.accessToken.toString()}`);
+            const loginToken = data.accessToken.toString();
+            console.log(`FB login success! ${loginToken}, email: ${data.email}`);
+            const infoRequest = new GraphRequest(
+              '/me',
+              {
+                accessToken: data.accessToken,
+                parameters: {
+                  fields: {
+                    string: 'email,name,first_name,middle_name,last_name'
+                  }
+                }
+              },
+              this._responseInfoCallback
+            );
 
-            // TODO: save token
-
-            this.props.navigation.navigate('Map');
+            new GraphRequestManager().addRequest(infoRequest).start();
           });
         }
       },
       error => alert(`FB login error: ${error}`)
     );
+  }
+
+  _responseInfoCallback = (error, result) => {
+    if (error) {
+      alert('Error fetching data: ' + error.toString());
+    } else {
+      alert('Success fetching data: ' + JSON.stringify(result));
+
+      // save email and login token to state
+      this.props.updateLoginAction({email: result.email, loginType: 'Facebook'});
+    }
+  };
+
+  componentWillReceiveProps(nextProps) {
+    //this.props.navigation.navigate('Map');
+
+    const {data} = nextProps;
+
+    if (this.props.data && this.props.data.loading !== data.loading) {
+      console.log(`Customer was fetched: ${JSON.stringify(data)}`);
+
+      if (data.allCustomers) {
+        if (data.allCustomers.length === 0) {
+          console.log(`New customer detected! create account pls...`);
+          //TODO: send mutation to graphql
+        } else {
+          const stripeCustomerId = data.allCustomers[0].stripeCustomerId;
+          console.log(`existing customer! stripeCustomerId: ${stripeCustomerId}`);
+        }
+      } else console.log(`allCustomer is null`);
+    }
   }
 
   onClickCreateAccount() {
@@ -48,6 +122,21 @@ export default class Login extends Component {
   }
 
   render() {
+    console.log(`In Render data looks like ${JSON.stringify(this.props.data)}`);
+
+    const {data} = this.props;
+    if (data) {
+      if (data.loading) {
+        console.log(`detected loading...`);
+        return (<View><Text>Loading...</Text></View>);
+      }
+
+      if (data.error) {
+        console.log(`detected error: ${data.error}`);
+        return (<View><Text>An unexpected error occurred</Text></View>);
+      }
+    }
+
     return (
       <View style={styles.container}>
         <Image source={require('../../../assets/images/logo-peerex.png')} style={styles.logoPeerex}/>
@@ -155,3 +244,14 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
 });
+
+const componentWithData = graphql(query, {
+  skip: ({email}) => !email, // don't fetch data if there's no email specified
+  options: ({email}) => ({
+    variables: {
+      email,
+    },
+  }),
+})(Login);
+
+export default connect(mapStateToProps, {updateLoginAction: updateLogin})(componentWithData);
