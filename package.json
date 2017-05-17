@@ -9,9 +9,12 @@
     "prepublish": "yarn run build"
   },
   "dependencies": {
+    "apollo-client": "^1.2.2",
     "babel-plugin-module-resolver": "^2.7.0",
+    "graphql-tag": "^2.0.0",
     "keymirror": "^0.1.1",
     "react": "16.0.0-alpha.6",
+    "react-apollo": "^1.2.0",
     "react-native": "0.43.3",
     "react-native-button": "^1.8.2",
     "react-native-checkout": "0.0.5",
