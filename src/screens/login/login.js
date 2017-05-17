@@ -15,6 +15,17 @@ import gql from 'graphql-tag'
 import {updateLogin} from './loginActions';
 import { connect } from 'react-redux';
 
+const mutation = gql`
+  mutation CreateCustomer($email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
+    createCustomer(email: $email, loginToken: $loginToken, loginType: $loginType) {
+      id
+      email
+      loginToken
+      loginType
+    }
+  }
+`;
+
 const query = gql`
 query CustomerQuery ($email: String!) {
   allCustomers(filter: {email: $email}) {
@@ -42,6 +53,7 @@ class Login extends Component {
   };
 
   static propTypes = {
+    mutate: PropTypes.func.isRequired,
     data: PropTypes.shape({
       loading: PropTypes.bool,
       error: PropTypes.object,
@@ -74,7 +86,7 @@ class Login extends Component {
                   }
                 }
               },
-              this._responseInfoCallback
+              (error, result) => this.onFBGraphRequestEnded(error, result, loginToken)
             );
 
             new GraphRequestManager().addRequest(infoRequest).start();
@@ -85,35 +97,37 @@ class Login extends Component {
     );
   }
 
-  _responseInfoCallback = (error, result) => {
+  onFBGraphRequestEnded = async (error, result, loginToken) => {
     if (error) {
-      alert('Error fetching data: ' + error.toString());
+      console.log(`onFBGraphRequestEnded Error fetching data: ${error.toString()}`);
     } else {
-      alert('Success fetching data: ' + JSON.stringify(result));
-
-      // save email and login token to state
-      this.props.updateLoginAction({email: result.email, loginType: 'Facebook'});
+      console.log(`onFBGraphRequestEnded Success fetching data: ${JSON.stringify(result)}`);
+      this.props.updateLoginAction({email: result.email, loginToken, loginType: 'Facebook'});
     }
   };
 
-  componentWillReceiveProps(nextProps) {
-    //this.props.navigation.navigate('Map');
+  // TODO: if new customer, mutate. if existing customer, update.
+  createOrUpdateCustomer = async (email, loginToken, loginType) => {
+    console.log(`mutation: ${email}, ${loginToken}, ${loginType}`);
+    await this.props.mutate({variables: {email, loginToken, loginType}});
+  };
 
+  componentWillReceiveProps(nextProps) {
     const {data} = nextProps;
 
-    if (this.props.data && this.props.data.loading !== data.loading) {
-      console.log(`Customer was fetched: ${JSON.stringify(data)}`);
+   if(data && data.allCustomers) {
+     const {allCustomers} = data;
 
-      if (data.allCustomers) {
-        if (data.allCustomers.length === 0) {
-          console.log(`New customer detected! create account pls...`);
-          //TODO: send mutation to graphql
-        } else {
-          const stripeCustomerId = data.allCustomers[0].stripeCustomerId;
-          console.log(`existing customer! stripeCustomerId: ${stripeCustomerId}`);
-        }
-      } else console.log(`allCustomer is null`);
-    }
+     if(allCustomers.length === 0) {
+       const {email, loginToken, loginType} = this.props;
+       this.createOrUpdateCustomer(email, loginToken, loginType);
+     } else {
+       const customer = allCustomers[0];
+       console.log(`customer already exists!! ${customer.stripeCustomerId}`);
+     }
+
+     this.props.navigation.navigate('Map');
+   }
   }
 
   onClickCreateAccount() {
@@ -122,9 +136,8 @@ class Login extends Component {
   }
 
   render() {
-    console.log(`In Render data looks like ${JSON.stringify(this.props.data)}`);
-
     const {data} = this.props;
+
     if (data) {
       if (data.loading) {
         console.log(`detected loading...`);
@@ -254,4 +267,6 @@ const componentWithData = graphql(query, {
   }),
 })(Login);
 
-export default connect(mapStateToProps, {updateLoginAction: updateLogin})(componentWithData);
+const componentWithMutation = graphql(mutation)(componentWithData);
+
+export default connect(mapStateToProps, {updateLoginAction: updateLogin})(componentWithMutation);
