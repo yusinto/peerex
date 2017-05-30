@@ -15,9 +15,20 @@ import gql from 'graphql-tag'
 import {updateLogin} from './loginActions';
 import { connect } from 'react-redux';
 
+/*
+ mutation {
+ updateOrCreateCustomer(
+ update: {id: "cj2sygzqu50lv0113wrs9cqhk", stripeCustomerId: "updatedStripeId"},
+ create:{email: "wendy@wendysmusic.com", loginToken: "someToken", loginType: Facebook, stripeCustomerId: "someStripeId"}){
+ id
+ email
+ }
+ }
+ * */
+//$email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!
 const mutation = gql`
-  mutation CreateCustomer($email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
-    createCustomer(email: $email, loginToken: $loginToken, loginType: $loginType) {
+  mutation UpdateOrCreateCustomer($update: UpdateCustomer!, $create: CreateCustomer!) {
+    updateOrCreateCustomer(update: $update, create: $create) {
       id
       email
       loginToken
@@ -29,6 +40,7 @@ const mutation = gql`
 const query = gql`
 query CustomerQuery ($email: String!) {
   allCustomers(filter: {email: $email}) {
+    id
     email
     loginType
     loginToken
@@ -106,28 +118,70 @@ class Login extends Component {
     }
   };
 
-  // TODO: if new customer, mutate. if existing customer, update.
-  createOrUpdateCustomer = async (email, loginToken, loginType) => {
-    console.log(`mutation: ${email}, ${loginToken}, ${loginType}`);
-    await this.props.mutate({variables: {email, loginToken, loginType}});
+  // TODO: if new customer, insert. if existing customer, update. Either way it's a mutate.
+  updateOrCreateCustomer = async (email, loginToken, loginType, customerId = '', stripeCustomerId = '') => {
+    //var stripe = require("stripe")(
+    //  "sk_test_BQokikJOvBiI2HlWgH4olfQ2"
+    //);
+    //
+    //stripe.customers.create({
+    //  description: 'Customer for david.jones@example.com',
+    //  source: "tok_189gGU2eZvKYlo2CWGDtxCFf" // obtained with Stripe.js
+    //}, function(err, customer) {
+    //  // asynchronously called
+    //});
+
+    let stripeCustomer;
+    const stripeEndpoint = 'https://peerex.co/api/v1/stripe/customer';
+
+    // TODO: contact our microservice to retrieve or create stripe customer
+    if(customerId) { // retrieve
+      stripeCustomer = await fetch(stripeEndpoint, {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'},
+        mode: 'cors',
+        body: JSON.stringify({stripeCustomerId}),
+      });
+    } else { // create
+      stripeCustomer = await fetch('https://peerex.co/api/v1/stripe/customer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        mode: 'cors',
+        body: JSON.stringify({customerId, email}),
+      });
+    }
+
+    // update or create graphcool customer
+    console.log(`mutation: ${customerId}, ${email}, ${loginToken}, ${loginType}`);
+    await this.props.mutate({
+      variables: {
+        update: {email, loginToken, loginType, stripeCustomerId: stripeCustomer.id, id: customerId},
+        create: {email, loginToken, loginType, stripeCustomerId: stripeCustomer.id},
+      }
+    });
   };
 
   componentWillReceiveProps(nextProps) {
     const {data} = nextProps;
 
-   if(data && data.allCustomers) {
-     const {allCustomers} = data;
+    if (data && data.allCustomers) {
+      const {allCustomers} = data;
+      const {email, loginToken, loginType} = nextProps;
+      let customerId = '';
+      let stripeCustomerId = '';
 
-     if(allCustomers.length === 0) {
-       const {email, loginToken, loginType} = this.props;
-       this.createOrUpdateCustomer(email, loginToken, loginType);
-     } else {
-       const customer = allCustomers[0];
-       console.log(`customer already exists!! ${customer.stripeCustomerId}`);
-     }
+      if (allCustomers.length === 0) {
+        console.log(`new customer detected. creating customer: ${email}`);
+      } else {
+        const customer = allCustomers[0];
+        customerId = customer.id;
+        stripeCustomerId = customer.stripeCustomerId;
+        console.log(`existing customer detected. updating customer: ${customerId} ${stripeCustomerId} ${email}`);
+      }
 
-     this.props.navigation.navigate('Map');
-   }
+      this.updateOrCreateCustomer(email, loginToken, loginType, customerId, stripeCustomerId);
+      this.props.navigation.navigate('Map');
+    }
   }
 
   onClickCreateAccount() {
