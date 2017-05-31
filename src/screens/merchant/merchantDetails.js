@@ -44,7 +44,8 @@ class MerchantDetails extends Component {
   };
 
   onAddCardSuccessful = (token) => {
-    //TODO: save token to graphcool against customer's login
+    console.log(`onAddCardSuccessful token: ${token}`);
+    //TODO: save credit card token to graphcool against customer's login
     this.setState({
       modalVisible: false,
       cardToken: token,
@@ -121,11 +122,7 @@ class MerchantDetails extends Component {
           onRequestClose={() => {alert("Modal has been closed.")}}
         >
           <StripeAddCard
-            publicStripeKey="pk_test_SCmjTpTsIyclK12cSKCjtaUt"
-            addCardHandler={(cardNumber, cardExpiry, cardCvc) => {
-              console.log(`${cardNumber} ${cardExpiry} ${cardCvc}`);
-              return Promise.resolve(cardNumber); //return a promise when you're done
-            }}
+            publicStripeKey="pk_test_BxQnxB54Ie3wLNhJYHkbzt2J"
             addCardTokenHandler={this.onAddCardSuccessful}
             styles={{
                addCardContainer: {
@@ -134,14 +131,6 @@ class MerchantDetails extends Component {
                 backgroundColor: '#F2F2F5',
               },
             }}
-            onCardNumberBlur={() => console.log('card number blurred')}
-            onCardNumberFocus={() => console.log('card number focused')}
-            onCvcFocus={() => console.log('cvc focused')}
-            onCvcBlur={() => console.log('cvc blurred')}
-            onExpiryFocus={() => console.log('expiry focused')}
-            onExpiryBlur={() => console.log('expiry blurred')}
-            onScanCardClose={() => console.log('scan card closed')}
-            onScanCardOpen={() => console.log('scan card opened')}
             activityIndicatorColor="pink"
             addCardButtonText="Add Card"
             scanCardButtonText="Scan Card"

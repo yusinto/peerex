@@ -119,44 +119,13 @@ class Login extends Component {
   };
 
   // TODO: if new customer, insert. if existing customer, update. Either way it's a mutate.
-  updateOrCreateCustomer = async (email, loginToken, loginType, customerId = '', stripeCustomerId = '') => {
-    //var stripe = require("stripe")(
-    //  "sk_test_BQokikJOvBiI2HlWgH4olfQ2"
-    //);
-    //
-    //stripe.customers.create({
-    //  description: 'Customer for david.jones@example.com',
-    //  source: "tok_189gGU2eZvKYlo2CWGDtxCFf" // obtained with Stripe.js
-    //}, function(err, customer) {
-    //  // asynchronously called
-    //});
-
-    let stripeCustomer;
-    const stripeEndpoint = 'https://peerex.co/api/v1/stripe/customer';
-
-    // TODO: contact our microservice to retrieve or create stripe customer
-    if(customerId) { // retrieve
-      stripeCustomer = await fetch(stripeEndpoint, {
-        method: 'GET',
-        headers: {'Content-Type': 'application/json'},
-        mode: 'cors',
-        body: JSON.stringify({stripeCustomerId}),
-      });
-    } else { // create
-      stripeCustomer = await fetch('https://peerex.co/api/v1/stripe/customer', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        mode: 'cors',
-        body: JSON.stringify({customerId, email}),
-      });
-    }
-
+  updateOrCreateCustomer = async (email, loginToken, loginType, customerId = '') => {
     // update or create graphcool customer
     console.log(`mutation: ${customerId}, ${email}, ${loginToken}, ${loginType}`);
     await this.props.mutate({
       variables: {
-        update: {email, loginToken, loginType, stripeCustomerId: stripeCustomer.id, id: customerId},
-        create: {email, loginToken, loginType, stripeCustomerId: stripeCustomer.id},
+        update: {email, loginToken, loginType, id: customerId},
+        create: {email, loginToken, loginType},
       }
     });
   };
@@ -176,10 +145,10 @@ class Login extends Component {
         const customer = allCustomers[0];
         customerId = customer.id;
         stripeCustomerId = customer.stripeCustomerId;
-        console.log(`existing customer detected. updating customer: ${customerId} ${stripeCustomerId} ${email}`);
+        console.log(`existing customer detected. updating customer: ${customerId} ${email}`);
       }
 
-      this.updateOrCreateCustomer(email, loginToken, loginType, customerId, stripeCustomerId);
+      this.updateOrCreateCustomer(email, loginToken, loginType, customerId);
       this.props.navigation.navigate('Map');
     }
   }
