@@ -15,38 +15,17 @@ import gql from 'graphql-tag'
 import {updateLogin} from './loginActions';
 import { connect } from 'react-redux';
 
-/*
- mutation {
- updateOrCreateCustomer(
- update: {id: "cj2sygzqu50lv0113wrs9cqhk", stripeCustomerId: "updatedStripeId"},
- create:{email: "wendy@wendysmusic.com", loginToken: "someToken", loginType: Facebook, stripeCustomerId: "someStripeId"}){
- id
- email
- }
- }
- * */
-//$email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!
 const mutation = gql`
-  mutation UpdateOrCreateCustomer($update: UpdateCustomer!, $create: CreateCustomer!) {
-    updateOrCreateCustomer(update: $update, create: $create) {
+  mutation UpdateCustomer($id: ID!, $email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!, $stripeCustomerId: String) {
+    updateCustomer(id: $id, email: $email, loginToken: $loginToken, loginType: $loginType, stripeCustomerId: $stripeCustomerId) {
       id
+      stripeCustomerId
       email
       loginToken
       loginType
     }
   }
 `;
-
-const query = gql`
-query CustomerQuery ($email: String!) {
-  allCustomers(filter: {email: $email}) {
-    id
-    email
-    loginType
-    loginToken
-    stripeCustomerId
-  }
-}`;
 
 const mapStateToProps = (state) => {
   const {login} = state;
@@ -114,65 +93,41 @@ class Login extends Component {
       console.log(`onFBGraphRequestEnded Error fetching data: ${error.toString()}`);
     } else {
       console.log(`onFBGraphRequestEnded Success fetching data: ${JSON.stringify(result)}`);
-      this.props.updateLoginAction({email: result.email, loginToken, loginType: 'Facebook'});
+
+      this.updateCustomer({
+        email: result.email,
+        loginType: 'Facebook',
+        loginToken,
+      });
     }
   };
 
-  // TODO: if new customer, insert. if existing customer, update. Either way it's a mutate.
-  updateOrCreateCustomer = async (email, loginToken, loginType, customerId = '') => {
-    // update or create graphcool customer
-    console.log(`mutation: ${customerId}, ${email}, ${loginToken}, ${loginType}`);
-    await this.props.mutate({
+  updateCustomer = async (updateObject) => {
+    console.log(`updateCustomer mutation: ${JSON.stringify(updateObject)}`);
+
+    const customer = await this.props.mutate({
       variables: {
-        update: {email, loginToken, loginType, id: customerId},
-        create: {email, loginToken, loginType},
+        ...updateObject,
+        id: 'dummyId',
+        stripeCustomerId: 'dummyStripeId'
       }
     });
+
+    if (customer) {
+      const {stripeCustomerId} = customer;
+      console.log(`successfully created/updated customer! stripeId: ${stripeCustomerId}`);
+      this.props.updateLoginAction(customer);
+      this.props.navigation.navigate('Map');
+    } else {
+      console.log(`failed to create/update customer! customer: ${JSON.stringify(customer)}`);
+    }
   };
 
-  componentWillReceiveProps(nextProps) {
-    const {data} = nextProps;
-
-    if (data && data.allCustomers) {
-      const {allCustomers} = data;
-      const {email, loginToken, loginType} = nextProps;
-      let customerId = '';
-      let stripeCustomerId = '';
-
-      if (allCustomers.length === 0) {
-        console.log(`new customer detected. creating customer: ${email}`);
-      } else {
-        const customer = allCustomers[0];
-        customerId = customer.id;
-        stripeCustomerId = customer.stripeCustomerId;
-        console.log(`existing customer detected. updating customer: ${customerId} ${email}`);
-      }
-
-      this.updateOrCreateCustomer(email, loginToken, loginType, customerId);
-      this.props.navigation.navigate('Map');
-    }
-  }
-
   onClickCreateAccount() {
-    // TODO: create account
     alert('TODO: create account');
   }
 
   render() {
-    const {data} = this.props;
-
-    if (data) {
-      if (data.loading) {
-        console.log(`detected loading...`);
-        return (<View><Text>Loading...</Text></View>);
-      }
-
-      if (data.error) {
-        console.log(`detected error: ${data.error}`);
-        return (<View><Text>An unexpected error occurred</Text></View>);
-      }
-    }
-
     return (
       <View style={styles.container}>
         <Image source={require('../../../assets/images/logo-peerex.png')} style={styles.logoPeerex}/>
@@ -281,15 +236,5 @@ const styles = StyleSheet.create({
   },
 });
 
-const componentWithData = graphql(query, {
-  skip: ({email}) => !email, // don't fetch data if there's no email specified
-  options: ({email}) => ({
-    variables: {
-      email,
-    },
-  }),
-})(Login);
-
-const componentWithMutation = graphql(mutation)(componentWithData);
-
+const componentWithMutation = graphql(mutation)(Login);
 export default connect(mapStateToProps, {updateLoginAction: updateLogin})(componentWithMutation);
