@@ -11,7 +11,19 @@ module.exports = (event) => {
   const email = event.data.email;
   const loginType = event.data.loginType;
   const loginToken = event.data.loginToken;
-  const query = JSON.stringify({query: `query {allCustomers(filter: {email: "${email}"}) {id}}`});
+  const query = JSON.stringify({
+    query: `
+    query {
+      allCustomers(filter: {email: "${email}"})
+      {
+        id
+        stripeCustomerId
+        loginType
+        loginToken
+        email
+      }
+    }
+  `});
   const graphCoolEndpoint = 'https://api.graph.cool/simple/v1/cj2q45mbs06v40103q55dqfm4';
 
   const createGraphCoolCustomer = (email, loginType, loginToken, stripeCustomerId) => {
@@ -27,6 +39,9 @@ module.exports = (event) => {
       {
         id
         stripeCustomerId
+        loginType
+        loginToken
+        email
       }
     }`
     });
@@ -39,19 +54,20 @@ module.exports = (event) => {
     });
   };
 
-  const updateGraphCoolCustomer = (id, email, loginType, loginToken) => {
+  const updateGraphCoolCustomer = (id, loginToken) => {
     const updateCustomer = JSON.stringify({
       query: `
     mutation {
       updateCustomer(
-        id: ${id},
-        loginType: ${loginType},
+        id: "${id}",
         loginToken: "${loginToken}",
-        email: "${email}"
       )
       {
         id
         stripeCustomerId
+        loginType
+        loginToken
+        email
       }
     }`
     });
@@ -95,7 +111,12 @@ module.exports = (event) => {
           createStripeCustomer(email)
             .then(stripeCustomerId => createGraphCoolCustomer(email, loginType, loginToken, stripeCustomerId))
             .then(response => response.json())
-            .then(responseJson => console.log(`Successfully created graphcool customer: ${JSON.stringify(responseJson)}`))
+            .then(responseJson => {
+              console.log(`Successfully created graphcool customer: ${JSON.stringify(responseJson)}`);
+              // HACK: abort pipeline here after creating/updating customer to prevent the original request
+              // from doing anything else!
+              reject({error: 'customer created manually'});
+            })
             .catch(error => {
               console.log(JSON.stringify(error));
               reject(error);
@@ -103,18 +124,19 @@ module.exports = (event) => {
         } else {
           const id = customers[0].id;
           console.log(`updating existing customer id: ${id}`);
-          updateGraphCoolCustomer(id, email, loginType, loginToken)
+          updateGraphCoolCustomer(id, loginToken)
             .then(response => response.json())
-            .then(responseJson => console.log(`Successfully updated graphcool customer: ${JSON.stringify(responseJson)}`))
+            .then(responseJson => {
+              console.log(`Successfully updated graphcool customer: ${JSON.stringify(responseJson)}`);
+              // HACK: abort pipeline here after creating/updating customer to prevent the original request
+              // from doing anything else!
+              reject({error: 'customer created manually'});
+            })
             .catch(error => {
               console.log(JSON.stringify(error));
               reject(error);
             });
         }
-
-        // HACK: abort pipeline here after creating/updating customer to prevent the original request
-        // from doing anything else!
-        reject({error: 'customer created manually'});
       })
       .catch(error => {
         console.log(JSON.stringify(error));
