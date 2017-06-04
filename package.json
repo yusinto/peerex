@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest",
+    "testw": "npm t -- --watchAll",
     "build": "babel src/ -d lib/",
     "prepublish": "yarn run build"
   },

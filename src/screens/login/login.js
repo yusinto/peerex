@@ -16,8 +16,8 @@ import {updateLogin} from './loginActions';
 import { connect } from 'react-redux';
 
 const mutation = gql`
-  mutation UpdateCustomer($id: ID!, $email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!, $stripeCustomerId: String) {
-    updateCustomer(id: $id, email: $email, loginToken: $loginToken, loginType: $loginType, stripeCustomerId: $stripeCustomerId) {
+  mutation UpdateCustomer($id: ID!, $email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
+    updateCustomer(id: $id, email: $email, loginToken: $loginToken, loginType: $loginType) {
       id
       stripeCustomerId
       email
@@ -109,7 +109,6 @@ class Login extends Component {
       variables: {
         ...updateObject,
         id: 'dummyId',
-        stripeCustomerId: 'dummyStripeId'
       }
     });
 
