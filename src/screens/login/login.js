@@ -14,6 +14,7 @@ import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import {updateLogin} from './loginActions';
 import { connect } from 'react-redux';
+import {API} from '../../constants';
 
 const mutation = gql`
   mutation UpdateCustomer($id: ID!, $email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
@@ -103,21 +104,22 @@ class Login extends Component {
   };
 
   updateCustomer = async (updateObject) => {
-    console.log(`updateCustomer mutation: ${JSON.stringify(updateObject)}`);
-
-    const customer = await this.props.mutate({
-      variables: {
-        ...updateObject,
-        id: 'dummyId',
-      }
-    });
-
-    if (customer) {
-      const {stripeCustomerId} = customer;
-      console.log(`successfully created/updated customer! stripeId: ${stripeCustomerId}`);
-      this.props.updateLoginAction(customer);
+    try {
+      const result = await fetch(`${API}/create-or-update-customer`,
+        {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateObject),
+        }
+      );
+      let resultJson = await result.json();
+      console.log(`successfully created/updated customer! ${JSON.stringify(resultJson)}`);
+      this.props.updateLoginAction(resultJson);
       this.props.navigation.navigate('Map');
-    } else {
+    } catch (e) {
       console.log(`failed to create/update customer! customer: ${JSON.stringify(customer)}`);
     }
   };
