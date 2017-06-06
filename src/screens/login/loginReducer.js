@@ -1,8 +1,8 @@
 import {Actions} from './loginActions';
 
 const initialState = {
+  id: '',
   email: '',
-  loginToken: '',
   loginType: '',
   stripeCustomerId: '',
 };

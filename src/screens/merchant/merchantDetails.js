@@ -15,12 +15,29 @@ import MERCHANTS from '../../data/merchants.json';
 import { connect } from 'react-redux';
 import {PeerexFeeInt} from '../../constants';
 import { StripeAddCard } from 'react-native-checkout'
+import { graphql } from 'react-apollo'
+import gql from 'graphql-tag'
 
 const mapStateToProps = (state) => {
+  const {login} = state;
+
   return {
+    id: login.id,
+    stripeCustomerId: login.stripeCustomerId,
     withdrawAmount: state.map.withdrawAmount,
   };
 };
+
+const mutation = gql`
+  mutation UpdateCustomer($id: ID!, $email: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
+    updateCustomer(id: $id, email: $email, loginType: $loginType) {
+      id
+      stripeCustomerId
+      email
+      loginType
+    }
+  }
+`;
 
 class MerchantDetails extends Component {
   static navigationOptions = ({ navigation, screenProps }) => {
@@ -28,6 +45,15 @@ class MerchantDetails extends Component {
       title: null,
       header: null,
     };
+  };
+
+  static propTypes = {
+    mutate: PropTypes.func.isRequired,
+    //data: PropTypes.shape({
+    //  loading: PropTypes.bool,
+    //  error: PropTypes.object,
+    //  allCustomers: PropTypes.array,
+    //}),
   };
 
   state = {
@@ -45,6 +71,7 @@ class MerchantDetails extends Component {
 
   onAddCardSuccessful = (token) => {
     console.log(`onAddCardSuccessful token: ${token}`);
+
     //TODO: save credit card token to graphcool against customer's login
     this.setState({
       modalVisible: false,
@@ -254,4 +281,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect(mapStateToProps)(MerchantDetails);
+const componentWithMutation = graphql(mutation)(MerchantDetails);
+export default connect(mapStateToProps)(componentWithMutation);

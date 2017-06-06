@@ -10,30 +10,15 @@ import Button from 'react-native-button';
 import {LoginButton, AccessToken, LoginManager, GraphRequest, GraphRequestManager} from 'react-native-fbsdk';
 import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/FontAwesome';
 import {colors} from './../../styles';
-import { graphql } from 'react-apollo'
-import gql from 'graphql-tag'
 import {updateLogin} from './loginActions';
 import { connect } from 'react-redux';
 import {API} from '../../constants';
-
-const mutation = gql`
-  mutation UpdateCustomer($id: ID!, $email: String!, $loginToken: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
-    updateCustomer(id: $id, email: $email, loginToken: $loginToken, loginType: $loginType) {
-      id
-      stripeCustomerId
-      email
-      loginToken
-      loginType
-    }
-  }
-`;
 
 const mapStateToProps = (state) => {
   const {login} = state;
   return {
     email: login.email,
     loginType: login.loginType,
-    loginToken: login.loginToken,
     stripeCustomerId: login.stripeCustomerId,
   };
 };
@@ -42,15 +27,6 @@ class Login extends Component {
   static navigationOptions = {
     title: 'Welcome',
     header: null,
-  };
-
-  static propTypes = {
-    mutate: PropTypes.func.isRequired,
-    data: PropTypes.shape({
-      loading: PropTypes.bool,
-      error: PropTypes.object,
-      allCustomers: PropTypes.array,
-    }),
   };
 
   constructor(props) {
@@ -78,7 +54,7 @@ class Login extends Component {
                   }
                 }
               },
-              (error, result) => this.onFBGraphRequestEnded(error, result, loginToken)
+              (error, result) => this.onFBGraphRequestEnded(error, result)
             );
 
             new GraphRequestManager().addRequest(infoRequest).start();
@@ -89,7 +65,7 @@ class Login extends Component {
     );
   }
 
-  onFBGraphRequestEnded = async (error, result, loginToken) => {
+  onFBGraphRequestEnded = async (error, result) => {
     if (error) {
       console.log(`onFBGraphRequestEnded Error fetching data: ${error.toString()}`);
     } else {
@@ -98,7 +74,6 @@ class Login extends Component {
       this.updateCustomer({
         email: result.email,
         loginType: 'Facebook',
-        loginToken,
       });
     }
   };
@@ -116,11 +91,12 @@ class Login extends Component {
         }
       );
       let resultJson = await result.json();
+
       console.log(`successfully created/updated customer! ${JSON.stringify(resultJson)}`);
       this.props.updateLoginAction(resultJson);
       this.props.navigation.navigate('Map');
     } catch (e) {
-      console.log(`failed to create/update customer! customer: ${JSON.stringify(customer)}`);
+      console.log(`failed to create/update customer! customer: ${updateObject}`);
     }
   };
 
@@ -237,5 +213,4 @@ const styles = StyleSheet.create({
   },
 });
 
-const componentWithMutation = graphql(mutation)(Login);
-export default connect(mapStateToProps, {updateLoginAction: updateLogin})(componentWithMutation);
+export default connect(mapStateToProps, {updateLoginAction: updateLogin})(Login);
