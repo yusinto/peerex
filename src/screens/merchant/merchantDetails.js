@@ -14,7 +14,7 @@ import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/Fon
 import MERCHANTS from '../../data/merchants.json';
 import { connect } from 'react-redux';
 import {PeerexFeeInt} from '../../constants';
-import { StripeAddCard } from 'react-native-checkout'
+import { AddCard } from 'react-native-checkout'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 
@@ -23,20 +23,21 @@ const mapStateToProps = (state) => {
 
   return {
     id: login.id,
+    email: login.email,
     stripeCustomerId: login.stripeCustomerId,
     withdrawAmount: state.map.withdrawAmount,
   };
 };
 
 const mutation = gql`
-  mutation UpdateCustomer($id: ID!, $email: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
-    updateCustomer(id: $id, email: $email, loginType: $loginType) {
-      id
-      stripeCustomerId
-      email
-      loginType
+    mutation UpdateCustomer($id: ID!, $email: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
+        updateCustomer(id: $id, email: $email, loginType: $loginType) {
+            id
+            stripeCustomerId
+            email
+            loginType
+        }
     }
-  }
 `;
 
 class MerchantDetails extends Component {
@@ -49,6 +50,8 @@ class MerchantDetails extends Component {
 
   static propTypes = {
     mutate: PropTypes.func.isRequired,
+    stripeCustomerId: PropTypes.string.isRequired,
+    id: PropTypes.id.isRequired,
     //data: PropTypes.shape({
     //  loading: PropTypes.bool,
     //  error: PropTypes.object,
@@ -69,14 +72,55 @@ class MerchantDetails extends Component {
     this.setState({modalVisible: !this.state.modalVisible});
   };
 
-  onAddCardSuccessful = (token) => {
-    console.log(`onAddCardSuccessful token: ${token}`);
+  createStripeSource = async ({cardNumber, cvc, expiry}) => {
+    try {
+      //const {stripeCustomerId, email, cardNumber, cvc, expiryMonth, expiryYear} = event;
+      const expiryMonth = expiry;
+      const expiryYear = expiry;
+
+      const result = await fetch(`${API}/create-source`,
+        {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cardNumber,
+            cvc,
+            expiryMonth,
+            expiryYear,
+            email: this.props.email,
+            stripeCustomerId: this.props.stripeCustomerId,
+          }),
+        }
+      );
+      let resultJson = await result.json();
+      console.log(`successfully created stripe source! ${JSON.stringify(resultJson)}`);
+    } catch (e) {
+      console.log(`failed to create stripe source: ${updateObject}`);
+    }
+  };
+
+  onValidateCardSuccessful = (cardNumber, cardExpiry, cardCvc) => {
+    console.log(`onValidateCardSuccessful : ${cardNumber} ${cardExpiry} ${cardCvc}`);
+
+    // TODO: now go to lambda to create source
+    const stripeSource = this.createStripeSource({cardNumber, cvc: cardCvc, expiryMonth: cardExpiry, expiryYear: cardExpiry});
 
     //TODO: save credit card token to graphcool against customer's login
-    this.setState({
-      modalVisible: false,
-      cardToken: token,
-    });
+    //this.props.mutate({...stripeSource, customerId: this.props.customerId});
+
+    // TODO: save sourceId and last4 to appState.currentSelectedSource
+    //this.props.updateAppCardState({sourceId, brand, last4});
+
+    // TODO: hide modal
+    //this.setState({
+    //  modalVisible: false,
+    //});
+
+    // Need to return a promise because this library assumes you'll be making remote calls in this step
+    return Promise.resolve(cardNumber); //return a promise when you're done
   };
 
   onClickGetCashNow = () => {
@@ -148,16 +192,17 @@ class MerchantDetails extends Component {
           visible={this.state.modalVisible}
           onRequestClose={() => {alert("Modal has been closed.")}}
         >
-          <StripeAddCard
-            publicStripeKey="pk_test_BxQnxB54Ie3wLNhJYHkbzt2J"
-            addCardTokenHandler={this.onAddCardSuccessful}
-            styles={{
-               addCardContainer: {
-                flex: 1,
-                justifyContent: 'center',
-                backgroundColor: '#F2F2F5',
-              },
-            }}
+          <AddCard
+            addCardHandler={this.onValidateCardSuccessful}
+            styles={{}} // Override default styles
+            onCardNumberBlur={() => console.log('card number blurred')}
+            onCardNumberFocus={() => console.log('card number focused')}
+            onCvcFocus={() => console.log('cvc focused')}
+            onCvcBlur={() => console.log('cvc blurred')}
+            onExpiryFocus={() => console.log('expiry focused')}
+            onExpiryBlur={() => console.log('expiry blurred')}
+            onScanCardClose={() => console.log('scan card closed')}
+            onScanCardOpen={() => console.log('scan card opened')}
             activityIndicatorColor="pink"
             addCardButtonText="Add Card"
             scanCardButtonText="Scan Card"
