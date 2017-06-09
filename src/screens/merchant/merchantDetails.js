@@ -17,15 +17,20 @@ import {PeerexFeeInt} from '../../constants';
 import { AddCard } from 'react-native-checkout'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
+import {API} from '../../constants';
+import {updateMerchantDetails} from './merchantDetailsActions';
 
 const mapStateToProps = (state) => {
-  const {login} = state;
+  const {login, map, merchantDetails} = state;
 
   return {
     id: login.id,
     email: login.email,
     stripeCustomerId: login.stripeCustomerId,
-    withdrawAmount: state.map.withdrawAmount,
+    sourceId: merchantDetails.sourceId,
+    brand: merchantDetails.brand,
+    last4: merchantDetails.last4,
+    withdrawAmount: map.withdrawAmount,
   };
 };
 
@@ -51,7 +56,7 @@ class MerchantDetails extends Component {
   static propTypes = {
     mutate: PropTypes.func.isRequired,
     stripeCustomerId: PropTypes.string.isRequired,
-    id: PropTypes.id.isRequired,
+    id: PropTypes.string.isRequired,
     //data: PropTypes.shape({
     //  loading: PropTypes.bool,
     //  error: PropTypes.object,
@@ -72,11 +77,10 @@ class MerchantDetails extends Component {
     this.setState({modalVisible: !this.state.modalVisible});
   };
 
-  createStripeSource = async ({cardNumber, cvc, expiry}) => {
+  createStripeSource = async ({cardNumber, cvc, expiryMonth, expiryYear}) => {
     try {
       //const {stripeCustomerId, email, cardNumber, cvc, expiryMonth, expiryYear} = event;
-      const expiryMonth = expiry;
-      const expiryYear = expiry;
+      console.log(`createStripeSource: email: ${this.props.email}, stripeCustomerId: ${this.props.stripeCustomerId}, ${cardNumber} ${cvc} ${expiryMonth} ${expiryYear}`);
 
       const result = await fetch(`${API}/create-source`,
         {
@@ -97,30 +101,33 @@ class MerchantDetails extends Component {
       );
       let resultJson = await result.json();
       console.log(`successfully created stripe source! ${JSON.stringify(resultJson)}`);
-    } catch (e) {
-      console.log(`failed to create stripe source: ${updateObject}`);
+      return resultJson;
+    } catch (err) {
+      console.log(`failed to create stripe source: ${err}`);
     }
   };
 
-  onValidateCardSuccessful = (cardNumber, cardExpiry, cardCvc) => {
-    console.log(`onValidateCardSuccessful : ${cardNumber} ${cardExpiry} ${cardCvc}`);
+  onValidateCardSuccessful = async (cardNumber, cardExpiry, cardCvc) => {
+    const [expiryMonth, expiryYear] = cardExpiry.split('/');
+
+    console.log(`onValidateCardSuccessful : ${cardNumber}, ${expiryMonth}, ${expiryYear} ${cardCvc}`);
 
     // TODO: now go to lambda to create source
-    const stripeSource = this.createStripeSource({cardNumber, cvc: cardCvc, expiryMonth: cardExpiry, expiryYear: cardExpiry});
+    const stripeSource = await this.createStripeSource({
+      cardNumber,
+      expiryMonth,
+      expiryYear,
+      cvc: cardCvc,
+    });
 
     //TODO: save credit card token to graphcool against customer's login
     //this.props.mutate({...stripeSource, customerId: this.props.customerId});
-
-    // TODO: save sourceId and last4 to appState.currentSelectedSource
-    //this.props.updateAppCardState({sourceId, brand, last4});
-
-    // TODO: hide modal
-    //this.setState({
-    //  modalVisible: false,
-    //});
+    this.props.updateMerchantDetailsAction(stripeSource);
 
     // Need to return a promise because this library assumes you'll be making remote calls in this step
-    return Promise.resolve(cardNumber); //return a promise when you're done
+    return Promise.resolve(cardNumber);
+
+    // TODO: how the fuck do we close the modal????
   };
 
   onClickGetCashNow = () => {
@@ -129,7 +136,6 @@ class MerchantDetails extends Component {
 
   render() {
     const merchant = MERCHANTS[this.props.navigation.state.params.index];
-    //const merchant = MERCHANTS[0];
     const {withdrawAmount} = this.props;
     const serviceFee = withdrawAmount * (PeerexFeeInt / 100);
     const total = serviceFee + withdrawAmount;
@@ -162,10 +168,7 @@ class MerchantDetails extends Component {
             <View style={styles.summaryItemContainer}>
               <Text style={styles.label}>Charge to</Text>
               {
-                this.state.cardToken ?
-                  <Text style={styles.label}></Text>
-                  :
-                  <Text style={styles.label}>add a card</Text>
+                <Text style={styles.label}>{this.state.last4 ? this.state.last4 : 'add a card'}</Text>
               }
             </View>
           </TouchableOpacity>
@@ -327,4 +330,4 @@ const styles = StyleSheet.create({
 });
 
 const componentWithMutation = graphql(mutation)(MerchantDetails);
-export default connect(mapStateToProps)(componentWithMutation);
+export default connect(mapStateToProps, {updateMerchantDetailsAction: updateMerchantDetails})(componentWithMutation);
