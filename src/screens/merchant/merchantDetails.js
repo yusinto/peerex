@@ -14,11 +14,11 @@ import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/Fon
 import MERCHANTS from '../../data/merchants.json';
 import { connect } from 'react-redux';
 import {PeerexFeeInt} from '../../constants';
-import { AddCard } from 'react-native-checkout'
-import { graphql } from 'react-apollo'
+//import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import {API} from '../../constants';
 import {updateMerchantDetails} from './merchantDetailsActions';
+import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 
 const mapStateToProps = (state) => {
   const {login, map, merchantDetails} = state;
@@ -34,16 +34,16 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mutation = gql`
-    mutation UpdateCustomer($id: ID!, $email: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
-        updateCustomer(id: $id, email: $email, loginType: $loginType) {
-            id
-            stripeCustomerId
-            email
-            loginType
-        }
-    }
-`;
+//const mutation = gql`
+//    mutation UpdateCustomer($id: ID!, $email: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
+//        updateCustomer(id: $id, email: $email, loginType: $loginType) {
+//            id
+//            stripeCustomerId
+//            email
+//            loginType
+//        }
+//    }
+//`;
 
 class MerchantDetails extends Component {
   static navigationOptions = ({ navigation, screenProps }) => {
@@ -54,33 +54,42 @@ class MerchantDetails extends Component {
   };
 
   static propTypes = {
-    mutate: PropTypes.func.isRequired,
+    //mutate: PropTypes.func.isRequired,
     stripeCustomerId: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
-    //data: PropTypes.shape({
-    //  loading: PropTypes.bool,
-    //  error: PropTypes.object,
-    //  allCustomers: PropTypes.array,
-    //}),
   };
 
   state = {
-    modalVisible: false,
-    cardToken: null,
+    isLoadingStripeSource: false,
   };
+
+  componentWillMount() {
+    CardIOUtilities.preload();
+  }
 
   onPressBack = () => {
     this.props.navigation.goBack();
   };
 
-  addCard = () => {
-    this.setState({modalVisible: !this.state.modalVisible});
+  addCard = async () => {
+    try {
+      const card = await CardIOModule.scanCard();
+      console.log(`card scanned: ${JSON.stringify(card)}`);
+      this.setState({isLoadingStripeSource: true});
+      const stripeSource = await this.createStripeSource(card);
+      this.props.updateMerchantDetailsAction(stripeSource);
+      this.setState({isLoadingStripeSource: false});
+    }
+    catch (err) {
+      console.log(`error scanning card: ${JSON.stringify(err)}`);
+    }
   };
 
-  createStripeSource = async ({cardNumber, cvc, expiryMonth, expiryYear}) => {
+  createStripeSource = async ({cardNumber, cvv, expiryMonth, expiryYear}) => {
     try {
       //const {stripeCustomerId, email, cardNumber, cvc, expiryMonth, expiryYear} = event;
-      console.log(`createStripeSource: email: ${this.props.email}, stripeCustomerId: ${this.props.stripeCustomerId}, ${cardNumber} ${cvc} ${expiryMonth} ${expiryYear}`);
+      console.log(`createStripeSource: email: ${this.props.email}, stripeCustomerId: ${this.props.stripeCustomerId},
+      ${cardNumber} ${cvv} ${expiryMonth} ${expiryYear}`);
 
       const result = await fetch(`${API}/create-source`,
         {
@@ -91,7 +100,7 @@ class MerchantDetails extends Component {
           },
           body: JSON.stringify({
             cardNumber,
-            cvc,
+            cvc: cvv,
             expiryMonth,
             expiryYear,
             email: this.props.email,
@@ -99,6 +108,7 @@ class MerchantDetails extends Component {
           }),
         }
       );
+
       let resultJson = await result.json();
       console.log(`successfully created stripe source! ${JSON.stringify(resultJson)}`);
       return resultJson;
@@ -107,31 +117,16 @@ class MerchantDetails extends Component {
     }
   };
 
-  onValidateCardSuccessful = async (cardNumber, cardExpiry, cardCvc) => {
-    const [expiryMonth, expiryYear] = cardExpiry.split('/');
+  getChargeToText = () => {
+    if (this.state.isLoadingStripeSource) {
+      return 'loading...';
+    }
 
-    console.log(`onValidateCardSuccessful : ${cardNumber}, ${expiryMonth}, ${expiryYear} ${cardCvc}`);
-
-    // TODO: now go to lambda to create source
-    const stripeSource = await this.createStripeSource({
-      cardNumber,
-      expiryMonth,
-      expiryYear,
-      cvc: cardCvc,
-    });
-
-    //TODO: save credit card token to graphcool against customer's login
-    //this.props.mutate({...stripeSource, customerId: this.props.customerId});
-    this.props.updateMerchantDetailsAction(stripeSource);
-
-    // Need to return a promise because this library assumes you'll be making remote calls in this step
-    return Promise.resolve(cardNumber);
-
-    // TODO: how the fuck do we close the modal????
+    return this.props.last4 ? `**** ${this.props.last4}` : 'add a card';
   };
 
   onClickGetCashNow = () => {
-    alert('todo');
+    alert('TODO: create new customer transaction request');
   };
 
   render() {
@@ -167,9 +162,7 @@ class MerchantDetails extends Component {
           <TouchableOpacity onPress={this.addCard}>
             <View style={styles.summaryItemContainer}>
               <Text style={styles.label}>Charge to</Text>
-              {
-                <Text style={styles.label}>{this.state.last4 ? this.state.last4 : 'add a card'}</Text>
-              }
+              <Text style={styles.label}>{this.getChargeToText()}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -189,29 +182,6 @@ class MerchantDetails extends Component {
             <Text style={styles.buttonText}>Get Cash Now</Text>
           </Button>
         </View>
-        <Modal
-          animationType={"slide"}
-          transparent={false}
-          visible={this.state.modalVisible}
-          onRequestClose={() => {alert("Modal has been closed.")}}
-        >
-          <AddCard
-            addCardHandler={this.onValidateCardSuccessful}
-            styles={{}} // Override default styles
-            onCardNumberBlur={() => console.log('card number blurred')}
-            onCardNumberFocus={() => console.log('card number focused')}
-            onCvcFocus={() => console.log('cvc focused')}
-            onCvcBlur={() => console.log('cvc blurred')}
-            onExpiryFocus={() => console.log('expiry focused')}
-            onExpiryBlur={() => console.log('expiry blurred')}
-            onScanCardClose={() => console.log('scan card closed')}
-            onScanCardOpen={() => console.log('scan card opened')}
-            activityIndicatorColor="pink"
-            addCardButtonText="Add Card"
-            scanCardButtonText="Scan Card"
-            scanCardAfterScanButtonText="Scan Card Again"
-          />
-        </Modal>
       </View>
     );
   }
@@ -329,5 +299,5 @@ const styles = StyleSheet.create({
   },
 });
 
-const componentWithMutation = graphql(mutation)(MerchantDetails);
-export default connect(mapStateToProps, {updateMerchantDetailsAction: updateMerchantDetails})(componentWithMutation);
+//const componentWithMutation = graphql(mutation)(MerchantDetails);
+export default connect(mapStateToProps, {updateMerchantDetailsAction: updateMerchantDetails})(MerchantDetails);
