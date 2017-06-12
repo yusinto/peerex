@@ -1,52 +1,62 @@
 [
   {
-    "key": "Wink Hostel",
-    "title": "Wink Hostel",
-    "description": "8A Mosque St , Chinatown, Singapore 059488",
+    "key": "Bunc Hostel",
+    "title": "Bunc Hostel",
+    "description": "15 Upper Weld Rd, Singapore 207372",
     "latLong": {
-      "latitude": 1.2840546,
-      "longitude": 103.8441844
+      "latitude": 1.305494,
+      "longitude": 103.85486
     },
-    "imageUrl": "https://www.bastionhotels.com/data/images/2/7/5/8/bastion-hotels-amsterdam-1.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/bunc.jpg"
   },
   {
-    "key": "Fernloft Chinatown",
-    "title": "Fernloft Chinatown",
-    "description": "5 Banda St, Singapore 050005",
+    "key": "5footway.inn Boat Quay",
+    "title": "5footway.inn Boat Quay",
+    "description": "76 Boat Quay, Singapore 049864",
     "latLong": {
-      "latitude": 1.2812237,
-      "longitude": 103.8433654
+      "latitude": 1.288272,
+      "longitude": 103.849365
     },
-    "imageUrl": "https://tex.org/wp-content/uploads/2013/06/Comfort-Inn-Near-SeaWorld.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/boat_quay.jpg"
   },
   {
-    "key": "Backpackers' Inn",
-    "title": "Backpackers' Inn",
-    "description": "27 Mosque Street, Singapore  059505",
+    "key": "5footway.inn Chinatown 1",
+    "title": "5footway.inn Chinatown 1",
+    "description": "63 Pagoda street, Singapore 059222",
     "latLong": {
-      "latitude": 1.2834953,
-      "longitude": 103.8455346
+      "latitude": 1.283608,
+      "longitude": 103.843965
     },
-    "imageUrl": "https://images.trvl-media.com/hotels/7000000/6200000/6196500/6196500/6196500_382_z.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/chinatown_1.jpg"
   },
   {
-    "key": "Beds and Dreams Inn@ChinaTown",
-    "title": "Beds and Dreams Inn@ChinaTown",
-    "description": "52 Temple St, Singapore 058597",
+    "key": "5footway.inn Ann Siang",
+    "title": "5footway.inn Ann Siang",
+    "description": "267 South Bridge Rd, Singapore 058816",
     "latLong": {
-      "latitude": 1.2833648,
-      "longitude": 103.8436216
+      "latitude": 1.281892,
+      "longitude": 103.845315
     },
-    "imageUrl": "https://s-media-cache-ak0.pinimg.com/236x/8a/8e/55/8a8e5530bfa905af20bab0d63d98ab46.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/ann_siang.jpg"
   },
   {
-    "key": "Maple Lodge",
-    "title": "Maple Lodge",
-    "description": "66 Pagoda St, Singapore 059225",
+    "key": "5footway.inn Bugis",
+    "title": "5footway.inn Bugis",
+    "description": "10 Aliwal St, Singapore 199903",
     "latLong": {
-      "latitude": 1.283754,
-      "longitude": 103.8439911
+      "latitude": 1.301881,
+      "longitude": 103.861422
     },
-    "imageUrl": "https://media-cdn.tripadvisor.com/media/photo-o/0a/c7/34/99/this-hotels-reflects.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/bugis.jpg"
+  },
+  {
+    "key": "5footway.inn Chinatown 2",
+    "title": "5footway.inn Chinatown 2",
+    "description": "227 South Bridge Road, Singapore 058776",
+    "latLong": {
+      "latitude": 1.28285,
+      "longitude": 103.845731
+    },
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/chinatown_2.jpg"
   }
 ]

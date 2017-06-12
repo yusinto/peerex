@@ -44,9 +44,9 @@ export default class Map extends Component {
 
   state = {
     initialPosition: {
-      latitude: 1.282940, // hardcode to Tiong Bahru chicken rice
-      longitude: 103.843417,
-      accuracy: 5,
+      latitude: 1.286288, // HACK: hardcode to Boat Quay so 5footwayinn hostels are centered
+      longitude: 103.850218,
+      accuracy: 32, // GOTCHA: adjust this to get the correct zoom levels
     },
     lastPosition: {
       latitude: 0,
