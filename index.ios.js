@@ -9,6 +9,7 @@ import Map from './src/screens/map/map';
 import Merchant from './src/screens/merchant/merchantDetails';
 import ApolloClient, {createNetworkInterface} from 'apollo-client';
 import {ApolloProvider} from 'react-apollo';
+import {GRAPH_COOL} from './src/constants';
 
 const store = createStore();
 const Navigator = StackNavigator(
@@ -24,7 +25,7 @@ const Navigator = StackNavigator(
 
 const client = new ApolloClient({
   networkInterface: createNetworkInterface({
-    uri: 'https://api.graph.cool/simple/v1/cj2q45mbs06v40103q55dqfm4',
+    uri: GRAPH_COOL,
   }),
 });
 

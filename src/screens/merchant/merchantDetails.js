@@ -16,7 +16,7 @@ import { connect } from 'react-redux';
 import {PeerexFeeInt} from '../../constants';
 //import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
-import {API} from '../../constants';
+import {LAMBDA_API} from '../../constants';
 import {updateMerchantDetails} from './merchantDetailsActions';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 
@@ -91,7 +91,7 @@ class MerchantDetails extends Component {
       console.log(`createStripeSource: email: ${this.props.email}, stripeCustomerId: ${this.props.stripeCustomerId},
       ${cardNumber} ${cvv} ${expiryMonth} ${expiryYear}`);
 
-      const result = await fetch(`${API}/create-source`,
+      const result = await fetch(`${LAMBDA_API}/create-source`,
         {
           method: 'POST',
           headers: {

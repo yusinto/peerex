@@ -12,7 +12,9 @@ import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/Fon
 import {colors} from './../../styles';
 import {updateLogin} from './loginActions';
 import { connect } from 'react-redux';
-import {API} from '../../constants';
+import {LAMBDA_API} from '../../constants';
+import {getFacebookEmail} from '../../logic/facebookLogic';
+import LoadingSpinnerOverlay from 'react-native-smart-loading-spinner-overlay';
 
 const mapStateToProps = (state) => {
   const {login} = state;
@@ -29,80 +31,73 @@ class Login extends Component {
     header: null,
   };
 
-  constructor(props) {
-    super(props);
-    this.onClickFBLogin = this.onClickFBLogin.bind(this);
-    this.onClickCreateAccount = this.onClickCreateAccount.bind(this);
+  componentDidMount() {
+    this.getFacebookEmailWithLoader();
   }
 
-  onClickFBLogin() {
-    LoginManager.logInWithReadPermissions(['email', 'public_profile']).then(
-      result => {
-        if (result.isCancelled) {
-          console.log('FB login cancelled');
-        } else {
-          AccessToken.getCurrentAccessToken().then(data => {
-            const loginToken = data.accessToken.toString();
-            console.log(`FB login success! ${loginToken}, email: ${data.email}`);
-            const infoRequest = new GraphRequest(
-              '/me',
-              {
-                accessToken: data.accessToken,
-                parameters: {
-                  fields: {
-                    string: 'email,name,first_name,middle_name,last_name'
-                  }
-                }
-              },
-              (error, result) => this.onFBGraphRequestEnded(error, result)
-            );
+  getFacebookEmailWithLoader = async () => {
+    this._modalLoadingSpinnerOverLay.show();
 
-            new GraphRequestManager().addRequest(infoRequest).start();
-          });
-        }
-      },
-      error => alert(`FB login error: ${error}`)
-    );
-  }
+    // GOTCHA: Graph request is fucked. We have to use a callback to get the graph response
+    // which means the actual email is not returned from this async method but
+    // is returned to the callback passed. getFacebookEmail returns the facebook login token
+    // if there's one. Otherwise it will be null which means the user has to sign in.
+    const token = await getFacebookEmail((err, result) => {
+      if (err) {
+        console.log(`Error fetching facebook user data: ${JSON.stringify(err)}`);
+      } else {
+        console.log(`Success fetching facebook user data: ${JSON.stringify(result)}`);
+        this.getCustomer({
+          email: result.email,
+          loginType: 'Facebook',
+        });
+      }
+    });
 
-  onFBGraphRequestEnded = async (error, result) => {
-    if (error) {
-      console.log(`onFBGraphRequestEnded Error fetching data: ${error.toString()}`);
-    } else {
-      console.log(`onFBGraphRequestEnded Success fetching data: ${JSON.stringify(result)}`);
-
-      this.updateCustomer({
-        email: result.email,
-        loginType: 'Facebook',
-      });
+    if (!token) {
+      this._modalLoadingSpinnerOverLay.hide();
     }
   };
 
-  updateCustomer = async (updateObject) => {
+  onClickFBLogin = async () => {
+    let loginResult;
     try {
-      const result = await fetch(`${API}/create-or-update-customer`,
+      loginResult = await LoginManager.logInWithReadPermissions(['email', 'public_profile']);
+    }
+    catch (err) {
+      console.log(`FB login error: ${JSON.stringify(err)}`);
+      return;
+    }
+
+    if (loginResult.isCancelled) {
+      console.log('FB login cancelled');
+    } else {
+      this.getFacebookEmailWithLoader();
+    }
+  };
+
+  getCustomer = async ({email, loginType}) => {
+    try {
+      const result = await fetch(`${LAMBDA_API}/create-or-update-customer`,
         {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(updateObject),
+          body: JSON.stringify({email, loginType}),
         }
       );
       let resultJson = await result.json();
 
       console.log(`successfully created/updated customer! ${JSON.stringify(resultJson)}`);
       this.props.updateLoginAction(resultJson);
+      this._modalLoadingSpinnerOverLay.hide();
       this.props.navigation.navigate('Map');
     } catch (e) {
-      console.log(`failed to create/update customer! customer: ${updateObject}`);
+      console.log(`failed to create/update customer! customer: ${email}, ${loginType}`);
     }
   };
-
-  onClickCreateAccount() {
-    alert('TODO: create account');
-  }
 
   render() {
     return (
@@ -120,13 +115,8 @@ class Login extends Component {
             <Text style={styles.continueWithFbText}>Continue with Facebook</Text>
           </View>
         </Button>
-        <Button
-          containerStyle={styles.signUpButtonContainer}
-          style={styles.signUpButtonText}
-          styleDisabled={{color: 'red'}}
-          onPress={this.onClickCreateAccount}>
-          Create Account
-        </Button>
+        <LoadingSpinnerOverlay
+          ref={ component => this._modalLoadingSpinnerOverLay = component }/>
       </View>
     );
   }
