@@ -30,7 +30,7 @@ export default class Map extends Component {
       fontSize: 16,
       fontWeight: '300',
     },
-    //headerLeft: TODO: hamburger slide out menu
+    headerLeft: null, // TODO: hamburger slide out menu
   };
 
   constructor(props) {
