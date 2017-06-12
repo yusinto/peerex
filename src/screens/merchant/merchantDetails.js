@@ -19,6 +19,7 @@ import gql from 'graphql-tag'
 import {LAMBDA_API} from '../../constants';
 import {updateMerchantDetails} from './merchantDetailsActions';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
+import Communications from 'react-native-communications';
 
 const mapStateToProps = (state) => {
   const {login, map, merchantDetails} = state;
@@ -125,6 +126,10 @@ class MerchantDetails extends Component {
     return this.props.last4 ? `**** ${this.props.last4}` : 'add a card';
   };
 
+  onClickCallMerchant = phone => {
+    Communications.phonecall(phone, true);
+  };
+
   onClickGetCashNow = () => {
     alert('TODO: create new customer transaction request');
   };
@@ -173,7 +178,7 @@ class MerchantDetails extends Component {
         <View style={styles.footerButtonContainer}>
           <Button
             containerStyle={[styles.button, {backgroundColor: colors.secondary}]}
-            onPress={this.onClickCallMerchant}>
+            onPress={() => this.onClickCallMerchant(merchant.phone)}>
             <Text style={styles.buttonText}>Call Merchant</Text>
           </Button>
           <Button

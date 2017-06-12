@@ -1,15 +1,5 @@
 [
   {
-    "key": "Bunc Hostel",
-    "title": "Bunc Hostel",
-    "description": "15 Upper Weld Rd, Singapore 207372",
-    "latLong": {
-      "latitude": 1.305494,
-      "longitude": 103.85486
-    },
-    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/bunc.jpg"
-  },
-  {
     "key": "5footway.inn Boat Quay",
     "title": "5footway.inn Boat Quay",
     "description": "76 Boat Quay, Singapore 049864",
@@ -17,7 +7,19 @@
       "latitude": 1.288272,
       "longitude": 103.849365
     },
-    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/boat_quay.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/boat_quay.jpg",
+    "phone": "+6565572769"
+  },
+  {
+    "key": "Bunc Hostel",
+    "title": "Bunc Hostel",
+    "description": "15 Upper Weld Rd, Singapore 207372",
+    "latLong": {
+      "latitude": 1.305494,
+      "longitude": 103.85486
+    },
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/bunc.jpg",
+    "phone": "+6562622862"
   },
   {
     "key": "5footway.inn Chinatown 1",
@@ -27,7 +29,8 @@
       "latitude": 1.283608,
       "longitude": 103.843965
     },
-    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/chinatown_1.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/chinatown_1.jpg",
+    "phone": "+6562215832"
   },
   {
     "key": "5footway.inn Ann Siang",
@@ -37,7 +40,8 @@
       "latitude": 1.281892,
       "longitude": 103.845315
     },
-    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/ann_siang.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/ann_siang.jpg",
+    "phone": "+6591049238"
   },
   {
     "key": "5footway.inn Bugis",
@@ -47,7 +51,8 @@
       "latitude": 1.301881,
       "longitude": 103.861422
     },
-    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/bugis.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/bugis.jpg",
+    "phone": "+6562955458"
   },
   {
     "key": "5footway.inn Chinatown 2",
@@ -57,6 +62,7 @@
       "latitude": 1.28285,
       "longitude": 103.845731
     },
-    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/chinatown_2.jpg"
+    "imageUrl": "https://s3-ap-southeast-1.amazonaws.com/peerex/chinatown_2.jpg",
+    "phone": "+6562238083"
   }
 ]
