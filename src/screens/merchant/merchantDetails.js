@@ -74,7 +74,7 @@ class MerchantDetails extends Component {
 
   addCard = async () => {
     try {
-      const card = await CardIOModule.scanCard();
+      const card = await CardIOModule.scanCard({useCardIOLogo: true});
       console.log(`card scanned: ${JSON.stringify(card)}`);
       this.setState({isLoadingStripeSource: true});
       const stripeSource = await this.createStripeSource(card);
