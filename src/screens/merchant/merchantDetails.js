@@ -7,19 +7,21 @@ import {
   TouchableOpacity,
   Icon,
   Modal,
+  Alert,
 } from 'react-native';
 import Button from 'react-native-button';
 import {colors} from '../../styles';
 import FontAwesomeIcon from '../../../node_modules/react-native-vector-icons/FontAwesome';
 import MERCHANTS from '../../data/merchants.json';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 import {PeerexFeeInt} from '../../constants';
-//import { graphql } from 'react-apollo'
-import gql from 'graphql-tag'
+import {graphql} from 'react-apollo'
+import gql from 'graphql-tag';
 import {LAMBDA_API} from '../../constants';
 import {updateMerchantDetails} from './merchantDetailsActions';
-import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
+import {CardIOModule, CardIOUtilities} from 'react-native-awesome-card-io';
 import Communications from 'react-native-communications';
+import LoadingSpinnerOverlay from 'react-native-smart-loading-spinner-overlay';
 
 const mapStateToProps = (state) => {
   const {login, map, merchantDetails} = state;
@@ -35,19 +37,27 @@ const mapStateToProps = (state) => {
   };
 };
 
-//const mutation = gql`
-//    mutation UpdateCustomer($id: ID!, $email: String!, $loginType: CUSTOMER_LOGIN_TYPE!) {
-//        updateCustomer(id: $id, email: $email, loginType: $loginType) {
-//            id
-//            stripeCustomerId
-//            email
-//            loginType
-//        }
-//    }
-//`;
+const mutation = gql`
+  mutation CreateTransaction($stripeSourceId: String!, $amount: Float!, $brand: String!, $last4: String!, $customerId: ID!) {
+    createTransaction(customerId: $customerId, stripeSourceId: $stripeSourceId, amount: $amount, brand: $brand, last4: $last4, pin: "xxx", status: Requested)
+    {
+      id
+      amount
+      customer {
+        id
+        email
+      }
+      pin
+      last4
+      brand
+      stripeSourceId
+      status
+    }
+  }
+`;
 
 class MerchantDetails extends Component {
-  static navigationOptions = ({ navigation, screenProps }) => {
+  static navigationOptions = ({navigation, screenProps}) => {
     return {
       title: null,
       header: null,
@@ -55,13 +65,13 @@ class MerchantDetails extends Component {
   };
 
   static propTypes = {
-    //mutate: PropTypes.func.isRequired,
+    mutate: PropTypes.func.isRequired,
     stripeCustomerId: PropTypes.string.isRequired,
     id: PropTypes.string.isRequired,
   };
 
   state = {
-    isLoadingStripeSource: false,
+    isLoading: false,
   };
 
   componentWillMount() {
@@ -76,19 +86,20 @@ class MerchantDetails extends Component {
     try {
       const card = await CardIOModule.scanCard({useCardIOLogo: true});
       console.log(`card scanned: ${JSON.stringify(card)}`);
-      this.setState({isLoadingStripeSource: true});
+
+      this._modalLoadingSpinnerOverLay.show();
       const stripeSource = await this.createStripeSource(card);
       this.props.updateMerchantDetailsAction(stripeSource);
-      this.setState({isLoadingStripeSource: false});
     }
     catch (err) {
       console.log(`error scanning card: ${JSON.stringify(err)}`);
     }
+
+    this._modalLoadingSpinnerOverLay.hide();
   };
 
   createStripeSource = async ({cardNumber, cvv, expiryMonth, expiryYear}) => {
     try {
-      //const {stripeCustomerId, email, cardNumber, cvc, expiryMonth, expiryYear} = event;
       console.log(`createStripeSource: email: ${this.props.email}, stripeCustomerId: ${this.props.stripeCustomerId},
       ${cardNumber} ${cvv} ${expiryMonth} ${expiryYear}`);
 
@@ -119,10 +130,6 @@ class MerchantDetails extends Component {
   };
 
   getChargeToText = () => {
-    if (this.state.isLoadingStripeSource) {
-      return 'loading...';
-    }
-
     return this.props.last4 ? `**** ${this.props.last4}` : 'add a card';
   };
 
@@ -130,8 +137,30 @@ class MerchantDetails extends Component {
     Communications.phonecall(phone, true);
   };
 
-  onClickGetCashNow = () => {
-    alert('TODO: create new customer transaction request');
+  onClickGetCashNow = async () => {
+    if(!this.props.sourceId) {
+      Alert.alert('Select a card', 'You need to select a card first before you can request for cash');
+      return;
+    }
+
+    try {
+      this._modalLoadingSpinnerOverLay.show();
+      const transaction = await this.props.mutate({
+        variables: {
+          customerId: this.props.id,
+          stripeSourceId: this.props.sourceId,
+          amount: this.props.withdrawAmount,
+          brand: this.props.brand,
+          last4: this.props.last4,
+        }
+      });
+      console.log(`Successfully created transaction: ${JSON.stringify(transaction)}`);
+    }
+    catch (err) {
+      console.log(`Error creating transaction: ${JSON.stringify(err)}`);
+    }
+
+    this._modalLoadingSpinnerOverLay.hide();
   };
 
   render() {
@@ -187,6 +216,8 @@ class MerchantDetails extends Component {
             <Text style={styles.buttonText}>Get Cash Now</Text>
           </Button>
         </View>
+        <LoadingSpinnerOverlay
+          ref={ component => this._modalLoadingSpinnerOverLay = component }/>
       </View>
     );
   }
@@ -304,5 +335,5 @@ const styles = StyleSheet.create({
   },
 });
 
-//const componentWithMutation = graphql(mutation)(MerchantDetails);
-export default connect(mapStateToProps, {updateMerchantDetailsAction: updateMerchantDetails})(MerchantDetails);
+const componentWithMutation = graphql(mutation)(MerchantDetails);
+export default connect(mapStateToProps, {updateMerchantDetailsAction: updateMerchantDetails})(componentWithMutation);
