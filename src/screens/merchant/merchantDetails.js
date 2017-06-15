@@ -33,7 +33,9 @@ const mapStateToProps = (state) => {
     sourceId: merchantDetails.sourceId,
     brand: merchantDetails.brand,
     last4: merchantDetails.last4,
-    withdrawAmount: map.withdrawAmount,
+    transactionId: merchantDetails.transactionId,
+    pin: merchantDetails.pin,
+    withdrawAmount: map.withdrawAmount
   };
 };
 
@@ -138,7 +140,7 @@ class MerchantDetails extends Component {
   };
 
   onClickGetCashNow = async () => {
-    if(!this.props.sourceId) {
+    if (!this.props.sourceId) {
       Alert.alert('Select a card', 'You need to select a card first before you can request for cash');
       return;
     }
@@ -155,12 +157,18 @@ class MerchantDetails extends Component {
         }
       });
       console.log(`Successfully created transaction: ${JSON.stringify(transaction)}`);
+      const {id: transactionId, pin} = transaction.data.createTransaction;
+      this.props.updateMerchantDetailsAction({transactionId, pin});
     }
     catch (err) {
       console.log(`Error creating transaction: ${JSON.stringify(err)}`);
     }
 
     this._modalLoadingSpinnerOverLay.hide();
+  };
+
+  onClickCancelRequest = () => {
+    alert('todo: cancel request');
   };
 
   render() {
@@ -179,6 +187,13 @@ class MerchantDetails extends Component {
           <Text style={styles.merchantTitle}>{merchant.title}</Text>
           <Text style={styles.merchantAddress}>{merchant.description}</Text>
         </View>
+        {
+          this.props.transactionId ?
+            <View style={styles.transactionIdPin}>
+              <Text style={styles.referenceNumberLabel}>PIN</Text>
+              <Text style={styles.referenceNumber}>{this.props.pin}</Text>
+            </View> : null
+        }
         <View style={styles.requestSummaryContainer}>
           <Text style={styles.summary}>Summary</Text>
           <View style={styles.summaryItemContainer}>
@@ -210,11 +225,21 @@ class MerchantDetails extends Component {
             onPress={() => this.onClickCallMerchant(merchant.phone)}>
             <Text style={styles.buttonText}>Call Merchant</Text>
           </Button>
-          <Button
-            containerStyle={[styles.button, {backgroundColor: colors.primary}]}
-            onPress={this.onClickGetCashNow}>
-            <Text style={styles.buttonText}>Get Cash Now</Text>
-          </Button>
+          { this.props.transactionId ?
+            <Button
+              containerStyle={[styles.button, {
+                backgroundColor: colors.white,
+              }]}
+              onPress={this.onClickCancelRequest}>
+              <Text style={[styles.buttonText, {color: colors.font}]}>Cancel Request</Text>
+            </Button>
+            :
+            <Button
+              containerStyle={[styles.button, {backgroundColor: colors.primary}]}
+              onPress={this.onClickGetCashNow}>
+              <Text style={styles.buttonText}>Get Cash Now</Text>
+            </Button>
+          }
         </View>
         <LoadingSpinnerOverlay
           ref={ component => this._modalLoadingSpinnerOverLay = component }/>
@@ -224,6 +249,24 @@ class MerchantDetails extends Component {
 }
 
 const styles = StyleSheet.create({
+  referenceNumber: {
+    marginTop: 5,
+    marginLeft: 16,
+    fontSize: 14,
+    color: colors.white,
+  },
+  referenceNumberLabel: {
+    fontSize: 11,
+    marginTop: 13,
+    marginLeft: 16,
+    color: colors.white,
+  },
+  transactionIdPin: {
+    marginTop: 8,
+    height: 60,
+    width: '100%',
+    backgroundColor: colors.primary,
+  },
   addCardModal: {
     top: 50,
   },
@@ -247,6 +290,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   merchantDetailsContainer: {
+    marginBottom: 8,
     height: 100,
     width: '100%',
     backgroundColor: colors.white,
@@ -264,7 +308,6 @@ const styles = StyleSheet.create({
     color: colors.secondaryFont,
   },
   requestSummaryContainer: {
-    marginTop: 8,
     height: 210,
     width: '100%',
     backgroundColor: colors.white,

@@ -4,6 +4,8 @@ const initialState = {
   sourceId: '',
   brand: '',
   last4: '',
+  transactionId: '',
+  pin: '',
 };
 
 export default function reducer(state = initialState, action = {}) {
