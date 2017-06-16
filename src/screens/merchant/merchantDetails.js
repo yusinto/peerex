@@ -30,6 +30,7 @@ const mapStateToProps = (state) => {
     id: login.id,
     email: login.email,
     stripeCustomerId: login.stripeCustomerId,
+    sources: login.sources,
     sourceId: merchantDetails.sourceId,
     brand: merchantDetails.brand,
     last4: merchantDetails.last4,
@@ -78,6 +79,14 @@ class MerchantDetails extends Component {
 
   componentWillMount() {
     CardIOUtilities.preload();
+  }
+
+  componentDidMount() {
+    // if this is a fresh transaction, set card to default card if there is one
+    if(!this.props.transactionId && this.props.sources.length > 0) {
+      const defaultCard = this.props.sources[0];
+      this.props.updateMerchantDetailsAction({...defaultCard});
+    }
   }
 
   onPressBack = () => {

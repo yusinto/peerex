@@ -5,7 +5,7 @@ const initialState = {
   email: '',
   loginType: '',
   stripeCustomerId: '',
-  sources: [],
+  sources: [], // source: {sourceId, last4, brand}. The first source is the default.
 };
 
 export default function reducer(state = initialState, action = {}) {
