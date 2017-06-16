@@ -18,24 +18,18 @@ import {PeerexFeeInt} from '../../constants';
 import {graphql} from 'react-apollo'
 import gql from 'graphql-tag';
 import {LAMBDA_API} from '../../constants';
-import {updateMerchantDetails} from './merchantDetailsActions';
 import {CardIOModule, CardIOUtilities} from 'react-native-awesome-card-io';
 import Communications from 'react-native-communications';
 import LoadingSpinnerOverlay from 'react-native-smart-loading-spinner-overlay';
 
 const mapStateToProps = (state) => {
-  const {login, map, merchantDetails} = state;
+  const {login, map} = state;
 
   return {
     id: login.id,
     email: login.email,
     stripeCustomerId: login.stripeCustomerId,
     sources: login.sources,
-    sourceId: merchantDetails.sourceId,
-    brand: merchantDetails.brand,
-    last4: merchantDetails.last4,
-    transactionId: merchantDetails.transactionId,
-    pin: merchantDetails.pin,
     withdrawAmount: map.withdrawAmount
   };
 };
@@ -75,17 +69,25 @@ class MerchantDetails extends Component {
 
   state = {
     isLoading: false,
+    transactionId: '',
+    pin: '',
+    sourceId: '',
+    brand: '',
+    last4: '',
   };
 
   componentWillMount() {
     CardIOUtilities.preload();
-  }
 
-  componentDidMount() {
-    // if this is a fresh transaction, set card to default card if there is one
-    if(!this.props.transactionId && this.props.sources.length > 0) {
-      const defaultCard = this.props.sources[0];
-      this.props.updateMerchantDetailsAction({...defaultCard});
+    const existingTransaction = this.props.navigation.state.params.transaction;
+
+    if(existingTransaction) {
+      this.setState({...existingTransaction});
+    } else { // fresh transaction
+      if(this.props.sources.length > 0) { // set card to default card if there is one
+        const defaultCard = this.props.sources[0];
+        this.setState({...defaultCard});
+      }
     }
   }
 
@@ -100,7 +102,10 @@ class MerchantDetails extends Component {
 
       this._modalLoadingSpinnerOverLay.show();
       const stripeSource = await this.createStripeSource(card);
-      this.props.updateMerchantDetailsAction(stripeSource);
+
+      // TODO: re-get stripe customer here so global sources get updated
+
+      this.setState({...stripeSource});
     }
     catch (err) {
       console.log(`error scanning card: ${JSON.stringify(err)}`);
@@ -141,7 +146,7 @@ class MerchantDetails extends Component {
   };
 
   getChargeToText = () => {
-    return this.props.last4 ? `**** ${this.props.last4}` : 'add a card';
+    return this.state.last4 ? `**** ${this.state.last4}` : 'add a card';
   };
 
   onClickCallMerchant = phone => {
@@ -149,7 +154,7 @@ class MerchantDetails extends Component {
   };
 
   onClickGetCashNow = async () => {
-    if (!this.props.sourceId) {
+    if (!this.state.sourceId) {
       Alert.alert('Select a card', 'You need to select a card first before you can request for cash');
       return;
     }
@@ -159,15 +164,15 @@ class MerchantDetails extends Component {
       const transaction = await this.props.mutate({
         variables: {
           customerId: this.props.id,
-          stripeSourceId: this.props.sourceId,
+          stripeSourceId: this.state.sourceId,
           amount: this.props.withdrawAmount,
-          brand: this.props.brand,
-          last4: this.props.last4,
+          brand: this.state.brand,
+          last4: this.state.last4,
         }
       });
       console.log(`Successfully created transaction: ${JSON.stringify(transaction)}`);
       const {id: transactionId, pin} = transaction.data.createTransaction;
-      this.props.updateMerchantDetailsAction({transactionId, pin});
+      this.setState({transactionId, pin});
     }
     catch (err) {
       console.log(`Error creating transaction: ${JSON.stringify(err)}`);
@@ -197,10 +202,10 @@ class MerchantDetails extends Component {
           <Text style={styles.merchantAddress}>{merchant.description}</Text>
         </View>
         {
-          this.props.transactionId ?
+          this.state.transactionId ?
             <View style={styles.transactionIdPin}>
               <Text style={styles.referenceNumberLabel}>PIN</Text>
-              <Text style={styles.referenceNumber}>{this.props.pin}</Text>
+              <Text style={styles.referenceNumber}>{this.state.pin}</Text>
             </View> : null
         }
         <View style={styles.requestSummaryContainer}>
@@ -234,7 +239,7 @@ class MerchantDetails extends Component {
             onPress={() => this.onClickCallMerchant(merchant.phone)}>
             <Text style={styles.buttonText}>Call Merchant</Text>
           </Button>
-          { this.props.transactionId ?
+          { this.state.transactionId ?
             <Button
               containerStyle={[styles.button, {
                 backgroundColor: colors.white,
@@ -388,4 +393,4 @@ const styles = StyleSheet.create({
 });
 
 const componentWithMutation = graphql(mutation)(MerchantDetails);
-export default connect(mapStateToProps, {updateMerchantDetailsAction: updateMerchantDetails})(componentWithMutation);
+export default connect(mapStateToProps)(componentWithMutation);
