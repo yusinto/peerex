@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -284,6 +285,34 @@
 			proxyType = 2;
 			remoteGlobalIDString = 5DBEB1501B18CEA900B34395;
 			remoteInfo = RNVectorIcons;
+		};
+		D2273B031EF4BA3700398C28 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 156F4CE6061A4F86B74A213F /* RNStripeCheckout.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 13B07F961A680F5B00A75B9A;
+			remoteInfo = RNStripeCheckout;
+		};
+		D2273B051EF4BA3700398C28 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 156F4CE6061A4F86B74A213F /* RNStripeCheckout.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 00E356EE1AD99517003FC87E;
+			remoteInfo = RNStripeCheckoutTests;
+		};
+		D2273B071EF4BA3700398C28 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 156F4CE6061A4F86B74A213F /* RNStripeCheckout.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2D02E47B1E0B4A5D006451C7;
+			remoteInfo = "RNStripeCheckout-tvOS";
+		};
+		D2273B091EF4BA3700398C28 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 156F4CE6061A4F86B74A213F /* RNStripeCheckout.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2D02E4901E0B4A5D006451C7;
+			remoteInfo = "RNStripeCheckout-tvOSTests";
 		};
 		D2428A121EEB83E00001868C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -675,6 +704,17 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		D2273AE11EF4BA0100398C28 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2273B041EF4BA3700398C28 /* RNStripeCheckout.app */,
+				D2273B061EF4BA3700398C28 /* RNStripeCheckoutTests.xctest */,
+				D2273B081EF4BA3700398C28 /* RNStripeCheckout-tvOS.app */,
+				D2273B0A1EF4BA3700398C28 /* RNStripeCheckout-tvOSTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		D24289F41EEB83E00001868C /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -852,6 +892,10 @@
 				{
 					ProductGroup = D24289F41EEB83E00001868C /* Products */;
 					ProjectRef = B2C21833820E465389CE45FC /* RNCardIO.xcodeproj */;
+				},
+				{
+					ProductGroup = D2273AE11EF4BA0100398C28 /* Products */;
+					ProjectRef = 156F4CE6061A4F86B74A213F /* RNStripeCheckout.xcodeproj */;
 				},
 				{
 					ProductGroup = D21E47391EA62AEA005F5922 /* Products */;
@@ -1063,6 +1107,34 @@
 			fileType = archive.ar;
 			path = libRNVectorIcons.a;
 			remoteRef = D21E475D1EA62AF0005F5922 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D2273B041EF4BA3700398C28 /* RNStripeCheckout.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = RNStripeCheckout.app;
+			remoteRef = D2273B031EF4BA3700398C28 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D2273B061EF4BA3700398C28 /* RNStripeCheckoutTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = RNStripeCheckoutTests.xctest;
+			remoteRef = D2273B051EF4BA3700398C28 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D2273B081EF4BA3700398C28 /* RNStripeCheckout-tvOS.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "RNStripeCheckout-tvOS.app";
+			remoteRef = D2273B071EF4BA3700398C28 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D2273B0A1EF4BA3700398C28 /* RNStripeCheckout-tvOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "RNStripeCheckout-tvOSTests.xctest";
+			remoteRef = D2273B091EF4BA3700398C28 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		D2428A131EEB83E00001868C /* libRNCardIO.a */ = {

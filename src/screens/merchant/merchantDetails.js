@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Icon,
   Modal,
+  FlatList,
   Alert,
 } from 'react-native';
 import Button from 'react-native-button';
@@ -17,10 +18,11 @@ import {connect} from 'react-redux';
 import {PeerexFeeInt} from '../../constants';
 import {graphql} from 'react-apollo'
 import gql from 'graphql-tag';
-import {LAMBDA_API} from '../../constants';
 import {CardIOModule, CardIOUtilities} from 'react-native-awesome-card-io';
 import Communications from 'react-native-communications';
 import LoadingSpinnerOverlay from 'react-native-smart-loading-spinner-overlay';
+import {createStripeSource} from '../../logic/stripeLogic';
+import {SelectPayment} from 'react-native-checkout';
 
 const mapStateToProps = (state) => {
   const {login, map} = state;
@@ -35,22 +37,22 @@ const mapStateToProps = (state) => {
 };
 
 const mutation = gql`
-  mutation CreateTransaction($stripeSourceId: String!, $amount: Float!, $brand: String!, $last4: String!, $customerId: ID!) {
-    createTransaction(customerId: $customerId, stripeSourceId: $stripeSourceId, amount: $amount, brand: $brand, last4: $last4, pin: "xxx", status: Requested)
-    {
-      id
-      amount
-      customer {
-        id
-        email
-      }
-      pin
-      last4
-      brand
-      stripeSourceId
-      status
+    mutation CreateTransaction($stripeSourceId: String!, $amount: Float!, $brand: String!, $last4: String!, $customerId: ID!) {
+        createTransaction(customerId: $customerId, stripeSourceId: $stripeSourceId, amount: $amount, brand: $brand, last4: $last4, pin: "xxx", status: Requested)
+        {
+            id
+            amount
+            customer {
+                id
+                email
+            }
+            pin
+            last4
+            brand
+            stripeSourceId
+            status
+        }
     }
-  }
 `;
 
 class MerchantDetails extends Component {
@@ -68,6 +70,7 @@ class MerchantDetails extends Component {
   };
 
   state = {
+    selectCardModalVisible: false,
     isLoading: false,
     transactionId: '',
     pin: '',
@@ -81,10 +84,10 @@ class MerchantDetails extends Component {
 
     const existingTransaction = this.props.navigation.state.params.transaction;
 
-    if(existingTransaction) {
+    if (existingTransaction) {
       this.setState({...existingTransaction});
     } else { // fresh transaction
-      if(this.props.sources.length > 0) { // set card to default card if there is one
+      if (this.props.sources.length > 0) { // set card to default card if there is one
         const defaultCard = this.props.sources[0];
         this.setState({...defaultCard});
       }
@@ -95,16 +98,24 @@ class MerchantDetails extends Component {
     this.props.navigation.goBack();
   };
 
+  onPressChargeTo = async () => {
+    // if default card exists, show list of available cards
+    if (this.state.sourceId) {
+      this.setState({selectCardModalVisible: true});
+    } else {
+      await this.addCard();
+    }
+  };
+
   addCard = async () => {
     try {
       const card = await CardIOModule.scanCard({useCardIOLogo: true});
       console.log(`card scanned: ${JSON.stringify(card)}`);
 
       this._modalLoadingSpinnerOverLay.show();
-      const stripeSource = await this.createStripeSource(card);
+      const stripeSource = await createStripeSource(card);
 
       // TODO: re-get stripe customer here so global sources get updated
-
       this.setState({...stripeSource});
     }
     catch (err) {
@@ -114,46 +125,15 @@ class MerchantDetails extends Component {
     this._modalLoadingSpinnerOverLay.hide();
   };
 
-  createStripeSource = async ({cardNumber, cvv, expiryMonth, expiryYear}) => {
-    try {
-      console.log(`createStripeSource: email: ${this.props.email}, stripeCustomerId: ${this.props.stripeCustomerId},
-      ${cardNumber} ${cvv} ${expiryMonth} ${expiryYear}`);
-
-      const result = await fetch(`${LAMBDA_API}/create-source`,
-        {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            cardNumber,
-            cvc: cvv,
-            expiryMonth,
-            expiryYear,
-            email: this.props.email,
-            stripeCustomerId: this.props.stripeCustomerId,
-          }),
-        }
-      );
-
-      let resultJson = await result.json();
-      console.log(`successfully created stripe source! ${JSON.stringify(resultJson)}`);
-      return resultJson;
-    } catch (err) {
-      console.log(`failed to create stripe source: ${err}`);
-    }
-  };
-
   getChargeToText = () => {
     return this.state.last4 ? `**** ${this.state.last4}` : 'add a card';
   };
 
-  onClickCallMerchant = phone => {
+  onPressCallMerchant = phone => {
     Communications.phonecall(phone, true);
   };
 
-  onClickGetCashNow = async () => {
+  onPressGetCashNow = async () => {
     if (!this.state.sourceId) {
       Alert.alert('Select a card', 'You need to select a card first before you can request for cash');
       return;
@@ -181,7 +161,7 @@ class MerchantDetails extends Component {
     this._modalLoadingSpinnerOverLay.hide();
   };
 
-  onClickCancelRequest = () => {
+  onPressCancelRequest = () => {
     alert('todo: cancel request');
   };
 
@@ -222,7 +202,7 @@ class MerchantDetails extends Component {
             <Text style={styles.label}>Total Payment</Text>
             <Text style={styles.amount}>SGD {total.toFixed(2)}</Text>
           </View>
-          <TouchableOpacity onPress={this.addCard}>
+          <TouchableOpacity onPress={this.onPressChargeTo}>
             <View style={styles.summaryItemContainer}>
               <Text style={styles.label}>Charge to</Text>
               <Text style={styles.label}>{this.getChargeToText()}</Text>
@@ -236,7 +216,7 @@ class MerchantDetails extends Component {
         <View style={styles.footerButtonContainer}>
           <Button
             containerStyle={[styles.button, {backgroundColor: colors.secondary}]}
-            onPress={() => this.onClickCallMerchant(merchant.phone)}>
+            onPress={() => this.onPressCallMerchant(merchant.phone)}>
             <Text style={styles.buttonText}>Call Merchant</Text>
           </Button>
           { this.state.transactionId ?
@@ -244,19 +224,31 @@ class MerchantDetails extends Component {
               containerStyle={[styles.button, {
                 backgroundColor: colors.white,
               }]}
-              onPress={this.onClickCancelRequest}>
+              onPress={this.onPressCancelRequest}>
               <Text style={[styles.buttonText, {color: colors.font}]}>Cancel Request</Text>
             </Button>
             :
             <Button
               containerStyle={[styles.button, {backgroundColor: colors.primary}]}
-              onPress={this.onClickGetCashNow}>
+              onPress={this.onPressGetCashNow}>
               <Text style={styles.buttonText}>Get Cash Now</Text>
             </Button>
           }
         </View>
         <LoadingSpinnerOverlay
           ref={ component => this._modalLoadingSpinnerOverLay = component }/>
+        <Modal
+          animationType={"slide"}
+          transparent={false}
+          visible={this.state.selectCardModalVisible}
+          onRequestClose={() => {alert("Modal has been closed.")}}
+        >
+          <SelectPayment
+            paymentSources={this.props.sources}
+            addCardHandler={() => console.log('Add Card Pressed!')}
+            selectPaymentHandler={(paymentSource) => console.log(paymentSource)}
+          />
+        </Modal>
       </View>
     );
   }
